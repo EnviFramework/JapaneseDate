@@ -23,57 +23,57 @@ class JapaneseDate
 {
 
     /**
-     * 旧暦クラス名
+     * +-- 旧暦クラス名
      */
-    const JD_LC_CLASS_NAME =  '\JapaneseDate\LunarCalendar';
+    const LC_CLASS_NAME =  '\JapaneseDate\LunarCalendar';
 
 
     /**
-     * 祝日定数
+     * +-- 祝日定数
      */
-    const JD_NO_HOLIDAY =  0;
-    const JD_NEW_YEAR_S_DAY =  1;
-    const JD_COMING_OF_AGE_DAY =  2;
-    const JD_NATIONAL_FOUNDATION_DAY =  3;
-    const JD_THE_SHOWA_EMPEROR_DIED =  4;
-    const JD_VERNAL_EQUINOX_DAY =  5;
-    const JD_DAY_OF_SHOWA =  6;
-    const JD_GREENERY_DAY =  7;
-    const JD_THE_EMPEROR_S_BIRTHDAY =  8;
-    const JD_CROWN_PRINCE_HIROHITO_WEDDING =  9;
-    const JD_CONSTITUTION_DAY =  10;
-    const JD_NATIONAL_HOLIDAY =  11;
-    const JD_CHILDREN_S_DAY =  12;
-    const JD_COMPENSATING_HOLIDAY =  13;
-    const JD_CROWN_PRINCE_NARUHITO_WEDDING =  14;
-    const JD_MARINE_DAY =  15;
-    const JD_AUTUMNAL_EQUINOX_DAY =  16;
-    const JD_RESPECT_FOR_SENIOR_CITIZENS_DAY =  17;
-    const JD_SPORTS_DAY =  18;
-    const JD_CULTURE_DAY =  19;
-    const JD_LABOR_THANKSGIVING_DAY =  20;
-    const JD_REGNAL_DAY =  21;
-    const JD_MOUNTAIN_DAY =  22;
+    const NO_HOLIDAY =  0;
+    const NEW_YEAR_S_DAY =  1;
+    const COMING_OF_AGE_DAY =  2;
+    const NATIONAL_FOUNDATION_DAY =  3;
+    const THE_SHOWA_EMPEROR_DIED =  4;
+    const VERNAL_EQUINOX_DAY =  5;
+    const DAY_OF_SHOWA =  6;
+    const GREENERY_DAY =  7;
+    const THE_EMPEROR_S_BIRTHDAY =  8;
+    const CROWN_PRINCE_HIROHITO_WEDDING =  9;
+    const CONSTITUTION_DAY =  10;
+    const NATIONAL_HOLIDAY =  11;
+    const CHILDREN_S_DAY =  12;
+    const COMPENSATING_HOLIDAY =  13;
+    const CROWN_PRINCE_NARUHITO_WEDDING =  14;
+    const MARINE_DAY =  15;
+    const AUTUMNAL_EQUINOX_DAY =  16;
+    const RESPECT_FOR_SENIOR_CITIZENS_DAY =  17;
+    const SPORTS_DAY =  18;
+    const CULTURE_DAY =  19;
+    const LABOR_THANKSGIVING_DAY =  20;
+    const REGNAL_DAY =  21;
+    const MOUNTAIN_DAY =  22;
 
     /**
-     * 特定月定数
+     * +-- 特定月定数
      */
-    const JD_VERNAL_EQUINOX_DAY_MONTH   =  3;
-    const JD_AUTUMNAL_EQUINOX_DAY_MONTH =  9;
+    const VERNAL_EQUINOX_DAY_MONTH   =  3;
+    const AUTUMNAL_EQUINOX_DAY_MONTH =  9;
 
     /**
-     * 曜日定数
+     * +-- 曜日定数
      */
-    const JD_SUNDAY =     0;
-    const JD_MONDAY =     1;
-    const JD_TUESDAY =    2;
-    const JD_WEDNESDAY =  3;
-    const JD_THURSDAY =   4;
-    const JD_FRIDAY =     5;
-    const JD_SATURDAY =   6;
+    const SUNDAY =     0;
+    const MONDAY =     1;
+    const TUESDAY =    2;
+    const WEDNESDAY =  3;
+    const THURSDAY =   4;
+    const FRIDAY =     5;
+    const SATURDAY =   6;
 
     /**
-     * 旧暦クラスオブジェクト
+     * +-- 旧暦クラスオブジェクト
      * @var japaneseDate_lunarCalendar
      */
     private $lc;
@@ -123,12 +123,12 @@ class JapaneseDate
 
     private $_24_sekki = array();
 
-    private $_use_luna = true;
+    private $_use_luna = false;
 
 
     /**#@-*/
 
-   /**
+    /**
      * +-- コンストラクタ
      *
      * @access public
@@ -138,39 +138,42 @@ class JapaneseDate
     public function __construct()
     {
         // 旧暦取り扱いクラス
-        $lc = self::JD_LC_CLASS_NAME;
+        $lc = self::LC_CLASS_NAME;
         $this->lc = new $lc();
     }
     /* ----------------------------------------- */
 
     /**
-     * 期間内の営業日を取得する
-     * @param integer integer $time_stamp 取得開始日
-     * @param integer integer $time_stamp_end 取得終了日
+     * +-- 期間内の営業日を取得する
+     *
+     * @param integer|string $time_stamp 取得開始日
+     * @param integer|string $time_stamp_end 取得終了日
      * @param boolean $is_bypass_holiday 祝日を無視するかどうか (optional)
      * @param array $bypass_week_arr 無視する曜日 (optional)
      * @param array $bypass_date_arr 無視する日 (optional)
      * @return array
      */
-    public function getWorkingDayBySpan($time_stamp, $time_stamp_end, $is_bypass_holiday = true, array $bypass_week_arr = NULL, array $bypass_date_arr = NULL )
+    public function getWorkingDayBySpan($time_stamp, $time_stamp_end, $is_bypass_holiday = true, array $bypass_week_arr = array(), array $bypass_date_arr = array() )
     {
-        if (is_array($bypass_week_arr)) {
+        if (!empty($bypass_week_arr)) {
             $bypass_week_arr   = array_flip($bypass_week_arr);
-        } else {
-            $bypass_week_arr = array();
         }
-        if (is_array($bypass_date_arr)) {
+        if (!empty($bypass_date_arr)) {
             $gc = array();
             foreach ($bypass_date_arr as $value) {
-                if (!ereg('^[1-9][0-9]*$', $value)) {
-                    $value = strtotime($value);
-                }
+                $value = $this->toTimeStamp($value);
                 $gc[mktime(0, 0, 0, date('m', $value), date('d', $value), date('Y', $value))] = 1;
             }
             $bypass_date_arr = $gc;
-        } else {
-            $bypass_date_arr = array();
         }
+        $time_stamp     = $this->toTimeStamp($time_stamp);
+        $time_stamp_end = $this->toTimeStamp($time_stamp_end);
+
+        // 終了日タイムスタンプを丸める
+        $year  = date('Y', $time_stamp_end);
+        $month = date('m', $time_stamp_end);
+        $day   = date('d', $time_stamp_end);
+        $time_stamp_end = mktime(0, 0, 0, $month, $day, $year);
 
         $res = array();
         $i = 0;
@@ -180,21 +183,20 @@ class JapaneseDate
         while ($time_stamp < $time_stamp_end) {
             $time_stamp = mktime(0, 0, 0, $month, $day + $i, $year);
             $gc = $this->purseTime($time_stamp);
-            if (
-                (array_key_exists($gc['week'], $bypass_week_arr) == false) &&
-                (array_key_exists($gc['time_stamp'], $bypass_date_arr) == false) &&
-                ($is_bypass_holiday ? $gc['holiday'] == self::JD_NO_HOLIDAY : true)
-            ) {
+            if ((array_key_exists($gc['week'], $bypass_week_arr) === false) &&
+                (array_key_exists($gc['time_stamp'], $bypass_date_arr) === false) &&
+                ($is_bypass_holiday ? $gc['holiday'] == self::NO_HOLIDAY : true)) {
                 $res[] = $gc;
             }
             $i++;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 営業日を取得します
+     * +-- 営業日を取得します
      *
      * getWorkingDayByLimitへのエイリアスです。
      *
@@ -209,9 +211,10 @@ class JapaneseDate
     {
         return $this->getWorkingDayByLimit($time_stamp, $lim_day, $is_bypass_holiday, $bypass_week_arr, $bypass_date_arr);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 営業日を取得します
+     * +-- 営業日を取得します
      *
      * @param integer integer $time_stamp 取得開始日
      * @param integer integer $lim_day 取得日数
@@ -220,25 +223,22 @@ class JapaneseDate
      * @param array $bypass_date_arr 無視する日 (optional)
      * @return array
      */
-    public function getWorkingDayByLimit($time_stamp, $lim_day, $is_bypass_holiday = true, array $bypass_week_arr = NULL, array $bypass_date_arr = NULL )
+    public function getWorkingDayByLimit($time_stamp, $lim_day, $is_bypass_holiday = true, array $bypass_week_arr = array(), array $bypass_date_arr = array())
     {
-        if (is_array($bypass_week_arr)) {
+        if (!empty($bypass_week_arr)) {
             $bypass_week_arr   = array_flip($bypass_week_arr);
-        } else {
-            $bypass_week_arr = array();
         }
-        if (is_array($bypass_date_arr)) {
+        if (!empty($bypass_date_arr)) {
             $gc = array();
             foreach ($bypass_date_arr as $value) {
-                if (!ereg('^[1-9][0-9]*$', $value)) {
-                    $value = strtotime($value);
-                }
+                $value     = $this->toTimeStamp($value);
                 $gc[mktime(0, 0, 0, date('m', $value), date('d', $value), date('Y', $value))] = 1;
             }
             $bypass_date_arr = $gc;
-        } else {
-            $bypass_date_arr = array();
         }
+
+
+        $time_stamp     = $this->toTimeStamp($time_stamp);
 
         $res = array();
         $i = 0;
@@ -248,17 +248,16 @@ class JapaneseDate
         while (count($res) != $lim_day) {
             $time_stamp = mktime(0, 0, 0, $month, $day + $i, $year);
             $gc = $this->purseTime($time_stamp);
-            if (
-                (array_key_exists($gc['week'], $bypass_week_arr) == false) &&
-                (array_key_exists($gc['time_stamp'], $bypass_date_arr) == false) &&
-                ($is_bypass_holiday ? $gc['holiday'] == self::JD_NO_HOLIDAY : true)
-   ) {
+            if ((array_key_exists($gc['week'], $bypass_week_arr) === false) &&
+                (array_key_exists($gc['time_stamp'], $bypass_date_arr) === false) &&
+                ($is_bypass_holiday ? $gc['holiday'] == self::NO_HOLIDAY : true)) {
                 $res[] = $gc;
             }
             $i++;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
      * +-- 旧暦情報を取得するようにモード変更
@@ -282,12 +281,12 @@ class JapaneseDate
      */
     public function withoutLuna()
     {
-        $this->_use_luna = true;
+        $this->_use_luna = false;
     }
     /* ----------------------------------------- */
 
     /**
-     * 指定月の祝日リストを取得する
+     * +-- 指定月の祝日リストを取得する
      *
      * @param integer $time_stamp タイムスタンプ
      * @return array
@@ -321,9 +320,10 @@ class JapaneseDate
             return $this->getDecemberHoliday($this->getYear($time_stamp));
         }
     }
+    /* ----------------------------------------- */
 
     /**
-     * 干支キーを返す
+     * +-- 干支キーを返す
      *
      * @param integer $time_stamp タイムスタンプ
      * @return int
@@ -331,43 +331,49 @@ class JapaneseDate
     public function getOrientalZodiac($time_stamp)
     {
         $res = ($this->getYear($time_stamp)+9)%12;
+
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 年号キーを返す
+     * +-- 年号キーを返す
      *
      * @param integer $time_stamp タイムスタンプ
      * @return int
      */
     public function getEraName($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         if (mktime(0, 0, 0, 1 , 7, 1989) >= $time_stamp) {
             //昭和
             return 0;
         }
+
         //平成
         return 1;
-
     }
+    /* ----------------------------------------- */
 
     /**
-     * 和暦を返す
+     * +-- 和暦を返す
      *
      * @param integer $time_stamp タイムスタンプ
      * @param integer 和暦モード(空にすると、自動取得)
      * @return int
      */
-    public function getEraYear($time_stamp, $key = -1)
+    public function getEraYear($time_stamp, $key = NULL)
     {
-        if ($key == -1) {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
+        if (empty($key)) {
             $key = $this->getEraName($time_stamp);
         }
         return $this->getYear($time_stamp)-$this->_era_calc[$key];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日本語フォーマットされた休日名を返す
+     * +-- 日本語フォーマットされた休日名を返す
      *
      * @param integer $key 休日キー
      * @return string
@@ -376,9 +382,10 @@ class JapaneseDate
     {
         return $this->_holiday_name[$key];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日本語フォーマットされた曜日名を返す
+     * +-- 日本語フォーマットされた曜日名を返す
      *
      * @param integer $key 曜日キー
      * @return string
@@ -387,10 +394,11 @@ class JapaneseDate
     {
         return $this->_weekday_name[$key];
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 日本語フォーマットされた旧暦月名を返す
+     * +-- 日本語フォーマットされた旧暦月名を返す
      *
      * @param integer $key 月キー
      * @return string
@@ -399,10 +407,11 @@ class JapaneseDate
     {
         return $this->_month_name[$key];
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 日本語フォーマットされた六曜名を返す
+     * +-- 日本語フォーマットされた六曜名を返す
      *
      * @param integer $key 六曜キー
      * @return string
@@ -411,10 +420,11 @@ class JapaneseDate
     {
         return array_key_exists($key, $this->_six_weekday) ? $this->_six_weekday[$key] : '';
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 日本語フォーマットされた戦争中曜日名を返す
+     * +-- 日本語フォーマットされた戦争中曜日名を返す
      *
      * @param integer $key 曜日キー
      * @return string
@@ -423,9 +433,10 @@ class JapaneseDate
     {
         return $this->during_the_war_period_weekday_name[$key];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日本語フォーマットされた干支を返す
+     * +-- 日本語フォーマットされた干支を返す
      *
      * @param integer $key 干支キー
      * @return string
@@ -434,9 +445,10 @@ class JapaneseDate
     {
         return $this->_oriental_zodiac[$key];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日本語フォーマットされた年号を返す
+     * +-- 日本語フォーマットされた年号を返す
      *
      * @param integer $key 年号キー
      * @return string
@@ -445,14 +457,15 @@ class JapaneseDate
     {
         return $this->_era_name[$key];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 春分の日を取得
+     * +-- 春分の日を取得
      *
      * @param integer $time_stamp タイムスタンプ
      * @return integer タイムスタンプ
      */
-    public function getVrenalEquinoxDay($year)
+    public function getVernalEquinoxDay($year)
     {
         if ($year <= 1979) {
             $day = floor(20.8357 + (0.242194 * ($year - 1980)) - floor(($year - 1980) / 4));
@@ -463,11 +476,12 @@ class JapaneseDate
         } else {
             return false;
         }
-        return mktime(0, 0, 0, self::JD_VERNAL_EQUINOX_DAY_MONTH, $day, $year);
+        return mktime(0, 0, 0, self::VERNAL_EQUINOX_DAY_MONTH, $day, $year);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 秋分の日を取得
+     * +-- 秋分の日を取得
      *
      * @param integer $time_stamp タイムスタンプ
      * @return integer タイムスタンプ
@@ -483,17 +497,19 @@ class JapaneseDate
         } else {
             return false;
         }
-        return mktime(0, 0, 0, self::JD_AUTUMNAL_EQUINOX_DAY_MONTH, $day, $year);
+        return mktime(0, 0, 0, self::AUTUMNAL_EQUINOX_DAY_MONTH, $day, $year);
     }
+    /* ----------------------------------------- */
 
     /**
-     * タイムスタンプを展開して、日付の詳細配列を取得する
+     * +-- タイムスタンプを展開して、日付の詳細配列を取得する
      *
      * @param integer $time_stamp タイムスタンプ
      * @return integer タイムスタンプ
      */
     public function makeDateArray($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         $res = array(
             'Year'    => $this->getYear($time_stamp),
             'Month'   => $this->getMonth($time_stamp),
@@ -502,12 +518,13 @@ class JapaneseDate
         );
 
         $holiday_list = $this->getHolidayList($time_stamp);
-        $res['Holiday'] = isset($holiday_list[$res['Day']]) ? $holiday_list[$res['Day']] : self::JD_NO_HOLIDAY;
+        $res['Holiday'] = isset($holiday_list[$res['Day']]) ? $holiday_list[$res['Day']] : self::NO_HOLIDAY;
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 第○ ■曜日の日付を取得します。
+     * +-- 第○ ■曜日の日付を取得します。
      *
      * @param integer $year 年
      * @param integer $month 月
@@ -544,9 +561,10 @@ class JapaneseDate
         $renb = 7*$renb+1;
         return $renb - $map[$this->getWeekday(mktime(0, 0, 0, $month, 1, $year))];
     }
+    /* ----------------------------------------- */
 
     /**
-     * 指定月のカレンダー配列を取得します
+     * +-- 指定月のカレンダー配列を取得します
      *
      * @param integer $year 年
      * @param integer $month 月
@@ -556,10 +574,11 @@ class JapaneseDate
         $lim = date('t', mktime(0, 0, 0, $month, 1, $year));
         return $this->getSpanCalendar($year, $month, 1, $lim);
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 指定範囲のカレンダー配列を取得します
+     * +-- 指定範囲のカレンダー配列を取得します
      *
      * @param integer $year 年
      * @param integer $month 月
@@ -592,7 +611,7 @@ class JapaneseDate
                 $lim--;
             }
             // 旧暦
-            $luna_array = $this->getLunaCalendarList($time_array, self::JD_KEY_TIMESTAMP);
+            $luna_array = $this->getLunaCalendarList($time_array, self::KEY_TIMESTAMP);
             foreach ($time_array as $time_stamp) {
                 $gc = $this->purseTime($time_stamp, $luna_array[$time_stamp]);
                 $res[] = $gc;
@@ -600,15 +619,17 @@ class JapaneseDate
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * タイムスタンプを展開して、日付情報を返します
+     * +-- タイムスタンプを展開して、日付情報を返します
      *
      * @param integer $time_stamp タイムスタンプ
      * @return array
      */
     public function purseTime($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         $luna = $this->_use_luna;
         $holiday = $this->getHolidayList($time_stamp);
 
@@ -617,33 +638,33 @@ class JapaneseDate
             'time_stamp' => $time_stamp,
             'day'        => $day,
             'strday'     => date('d', $time_stamp),
-            'holiday'    => isset($holiday[$day]) ? $holiday[$day] : self::JD_NO_HOLIDAY,
+            'holiday'    => isset($holiday[$day]) ? $holiday[$day] : self::NO_HOLIDAY,
             'week'       => $this->getWeekday($time_stamp),
             'month'      => date('m', $time_stamp),
             'year'       => date('Y', $time_stamp),
         );
-
-        if ($luna === true) {
-            $luna = $this->getLunarCalendar($time_stamp);
+        if (!$luna) {
+            return $res;
         }
+        $luna = $this->getLunarCalendar($time_stamp);
 
-        if (is_array($luna)) {
-            $res['sixweek']      = $this->getSixWeekday($luna['time_stamp']);
-            $res['luna_sixweek'] = $luna['time_stamp'];
-            $res['is_chuki']     = $luna['is_chuki'];
-            $res['chuki']        = $luna['chuki'];
-            $res['tuitachi_jd']  = $luna['tuitachi_jd'];
-            $res['jd']           = $luna['jd'];
-            $res['luna_year']    = $luna['year'];
-            $res['luna_month']   = $luna['month'];
-            $res['luna_day']     = $luna['day'];
-            $res['uruu']         = $luna['uruu'];
-        }
+        $res['sixweek']         = $this->getSixWeekdayByLuna($luna['month'], $luna['day']);
+        $res['luna_time_stamp'] = $luna['time_stamp'];
+        $res['is_chuki']     = $luna['is_chuki'];
+        $res['chuki']        = $luna['chuki'];
+        $res['tuitachi_jd']  = $luna['tuitachi_jd'];
+        $res['jd']           = $luna['jd'];
+        $res['luna_year']    = $luna['year'];
+        $res['luna_month']   = $luna['month'];
+        $res['luna_day']     = $luna['day'];
+        $res['uruu']         = $luna['uruu'];
+
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 旧暦・月齢を取得する
+     * +-- 旧暦・月齢を取得する
      *
      * @param integer $time_stamp タイムスタンプ
      * @see japaneseDate_lunarCalendar::getLunarCalendar()
@@ -651,24 +672,27 @@ class JapaneseDate
      */
     public function getLunarCalendar($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return $this->lc->getLunarCalendar($time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 旧暦・月齢リストを取得する
+     * +-- 旧暦・月齢リストを取得する
      *
      * @param array $time_stamp_array タイムスタンプのリスト
-     * @param array $mode self::JD_KEY_TIMESTAMP|self::JD_KEY_ORDERD
+     * @param array $mode self::KEY_TIMESTAMP|self::KEY_ORDERD
      * @see japaneseDate_lunarCalendar::getLunaCalendarList()
      * @return array
      */
-    public function getLunaCalendarList($time_stamp_array, $mode = self::JD_KEY_ORDERD)
+    public function getLunaCalendarList($time_stamp_array, $mode = self::KEY_ORDERD)
     {
         return $this->lc->getLunaCalendarList($time_stamp_array, $mode);
     }
+    /* ----------------------------------------- */
 
     /**
-     * ユニックスタイムスタンプから、ユリウス暦を取得します。
+     * +-- ユニックスタイムスタンプから、ユリウス暦を取得します。
      *
      * @param integer $time_stamp タイムスタンプ
      * @see japaneseDate_lunarCalendar::time2JD()
@@ -676,12 +700,14 @@ class JapaneseDate
      */
     public function time2JD($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return $this->lc->time2JD($time_stamp);
     }
+    /* ----------------------------------------- */
 
 
     /**
-     * 日本語カレンダー対応したstrftime()
+     * +-- 日本語カレンダー対応したstrftime()
      *
      * <pre>{@link http://php.five-foxes.com/module/php_man/index.php?web=public function.strftime strftimeの仕様}
      * に加え、
@@ -708,11 +734,13 @@ class JapaneseDate
      * @param integer $time_stamp 変換したいタイムスタンプ(デフォルトは現在のロケール時間)
      * @return string
      */
-    public function mb_strftime($format, $time_stamp = false)
+    public function mb_strftime($format, $time_stamp = NULL)
     {
         $luna = $this->_use_luna;
-        if ($time_stamp === false) {
+        if (empty($time_stamp)) {
             $time_stamp = time();
+        } else {
+            $time_stamp     = $this->toTimeStamp($time_stamp);
         }
         $jtime = $this->purseTime($time_stamp);
         $OrientalZodiac = $this->getOrientalZodiac($time_stamp);
@@ -763,336 +791,391 @@ class JapaneseDate
         }
         return strftime($resstr, $time_stamp);
     }
+    /* ----------------------------------------- */
+
 
 
     /**
-     * 七曜を数値化して返します
+     * +-- 六曜を数値化して返します
      *
      * @param integer $time_stamp タイムスタンプ
      */
-    private function getWeekday($time_stamp)
+    public function getSixWeekday($time_stamp)
     {
+        $luna = $this->getLunarCalendar($time_stamp);
+        return $this->getSixWeekdayByLuna($luna['month'], $luna['day']);
+    }
+    /* ----------------------------------------- */
+
+
+    /**
+     * +-- 六曜を数値化して返します
+     *
+     * @param integer $time_stamp タイムスタンプ
+     */
+    protected function getSixWeekdayByLuna($month, $day)
+    {
+        return ($month+$day) % 6;
+    }
+    /* ----------------------------------------- */
+
+
+    /**
+     * +-- 七曜を数値化して返します
+     *
+     * @param integer $time_stamp タイムスタンプ
+     */
+    protected function getWeekday($time_stamp)
+    {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return date('w', $time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 年を数値化して返します
+     * +-- 年を数値化して返します
      *
      * @param integer $time_stamp タイムスタンプ
      */
-    private function getYear($time_stamp)
+    protected function getYear($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return date('Y', $time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 月を数値化して返します
+     * +-- 月を数値化して返します
      *
      * @param integer $time_stamp タイムスタンプ
      */
-    private function getMonth($time_stamp)
+    protected function getMonth($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return date('n', $time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日を数値化して返します
+     * +-- 日を数値化して返します
      *
      * @param integer $time_stamp タイムスタンプ
      */
-    private function getDay($time_stamp)
+    protected function getDay($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return date('j', $time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 日を表示用フォーマットで返します
+     * +-- 日を表示用フォーマットで返します
      *
      * @param integer $time_stamp タイムスタンプ
      */
-    private function getStrDay($time_stamp)
+    protected function getStrDay($time_stamp)
     {
+        $time_stamp     = $this->toTimeStamp($time_stamp);
         return date('d', $time_stamp);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 六曜を数値化して返します
-     *
-     * @param integer $time_stamp タイムスタンプ
-     */
-    private function getSixWeekday($time_stamp)
-    {
-        return (date('j', $time_stamp)+date('n', $time_stamp)) % 6;
-    }
-
-    /**
-     * 祝日判定ロジック一月
+     * +-- 祝日判定ロジック一月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getJanuaryHoliday($year)
+    protected function getJanuaryHoliday($year)
     {
-        $res[1] = self::JD_NEW_YEAR_S_DAY;
+        $res[1] = self::NEW_YEAR_S_DAY;
         //振替休日確認
-        if ($this->getWeekDay(mktime(0, 0, 0, 1, 1, $year)) == self::JD_SUNDAY) {
-            $res[2] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 1, 1, $year)) == self::SUNDAY) {
+            $res[2] = self::COMPENSATING_HOLIDAY;
         }
         if ($year >= 2000) {
             //2000年以降は第二月曜日に変更
-            $second_monday = $this->getDayByWeekly($year, 1, self::JD_MONDAY, 2);
-            $res[$second_monday] = self::JD_COMING_OF_AGE_DAY;
+            $second_monday = $this->getDayByWeekly($year, 1, self::MONDAY, 2);
+            $res[$second_monday] = self::COMING_OF_AGE_DAY;
 
         } else {
-            $res[15] = self::JD_COMING_OF_AGE_DAY;
+            $res[15] = self::COMING_OF_AGE_DAY;
             //振替休日確認
-            if ($this->getWeekDay(mktime(0, 0, 0, 1, 15, $year)) == self::JD_SUNDAY) {
-                $res[16] = self::JD_COMPENSATING_HOLIDAY;
+            if ($this->getWeekDay(mktime(0, 0, 0, 1, 15, $year)) == self::SUNDAY) {
+                $res[16] = self::COMPENSATING_HOLIDAY;
             }
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック二月
+     * +-- 祝日判定ロジック二月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getFebruaryHoliday($year)
+    protected function getFebruaryHoliday($year)
     {
-        $res[11] = self::JD_NATIONAL_FOUNDATION_DAY;
+        $res[11] = self::NATIONAL_FOUNDATION_DAY;
         //振替休日確認
-        if ($this->getWeekDay(mktime(0, 0, 0, 2, 11, $year)) == self::JD_SUNDAY) {
-            $res[12] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 2, 11, $year)) == self::SUNDAY) {
+            $res[12] = self::COMPENSATING_HOLIDAY;
         }
         if ($year == 1989) {
-            $res[24] = self::JD_THE_SHOWA_EMPEROR_DIED;
+            $res[24] = self::THE_SHOWA_EMPEROR_DIED;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック三月
+     * +-- 祝日判定ロジック三月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getMarchHoliday($year)
+    protected function getMarchHoliday($year)
     {
-        $VrenalEquinoxDay = $this->getVrenalEquinoxDay($year);
-        $res[$this->getDay($VrenalEquinoxDay)] = self::JD_VERNAL_EQUINOX_DAY;
+        $VernalEquinoxDay = $this->getVernalEquinoxDay($year);
+        $res[$this->getDay($VernalEquinoxDay)] = self::VERNAL_EQUINOX_DAY;
         //振替休日確認
-        if ($this->getWeekDay($VrenalEquinoxDay) == self::JD_SUNDAY) {
-            $res[$this->getDay($VrenalEquinoxDay)+1] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay($VernalEquinoxDay) == self::SUNDAY) {
+            $res[$this->getDay($VernalEquinoxDay)+1] = self::COMPENSATING_HOLIDAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック四月
+     * +-- 祝日判定ロジック四月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getAprilHoliday($year)
+    protected function getAprilHoliday($year)
     {
         if ($year == 1959) {
-            $res[10] = self::JD_CROWN_PRINCE_HIROHITO_WEDDING;
+            $res[10] = self::CROWN_PRINCE_HIROHITO_WEDDING;
         }
         if ($year >= 2007) {
-            $res[29] = self::JD_DAY_OF_SHOWA;
+            $res[29] = self::DAY_OF_SHOWA;
         } elseif ($year >= 1989) {
-            $res[29] = self::JD_GREENERY_DAY;
+            $res[29] = self::GREENERY_DAY;
         } else {
-            $res[29] = self::JD_THE_EMPEROR_S_BIRTHDAY;
+            $res[29] = self::THE_EMPEROR_S_BIRTHDAY;
         }
         //振替休日確認
-        if ($this->getWeekDay(mktime(0, 0, 0, 4, 29, $year)) == self::JD_SUNDAY) {
-            $res[30] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 4, 29, $year)) == self::SUNDAY) {
+            $res[30] = self::COMPENSATING_HOLIDAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック五月
+     * +-- 祝日判定ロジック五月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getMayHoliday($year)
+    protected function getMayHoliday($year)
     {
-        $res[3] = self::JD_CONSTITUTION_DAY;
+        $res[3] = self::CONSTITUTION_DAY;
         if ($year >= 2007) {
-            $res[4] = self::JD_GREENERY_DAY;
+            $res[4] = self::GREENERY_DAY;
         } elseif ($year >= 1986) {
-            // 5/4が日曜日の場合はそのまま､月曜日の場合はは『憲法記念日の振替休日』(2006年迄)
-            if ($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) > self::JD_MONDAY) {
-                $res[4] = self::JD_NATIONAL_HOLIDAY;
-            } elseif ($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) == self::JD_MONDAY)  {
-                $res[4] = self::JD_COMPENSATING_HOLIDAY;
+            // 5/4が日曜日の場合はそのまま､月曜日の場合は『憲法記念日の振替休日』(2006年迄)
+            if ($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) > self::MONDAY) {
+                $res[4] = self::NATIONAL_HOLIDAY;
+            } elseif ($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) == self::MONDAY)  {
+                $res[4] = self::COMPENSATING_HOLIDAY;
             }
         }
-        $res[5] = self::JD_CHILDREN_S_DAY;
-        if ($this->getWeekDay(mktime(0, 0, 0, 5, 5, $year)) == self::JD_SUNDAY) {
-            $res[6] = self::JD_COMPENSATING_HOLIDAY;
+        $res[5] = self::CHILDREN_S_DAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 5, 5, $year)) == self::SUNDAY) {
+            $res[6] = self::COMPENSATING_HOLIDAY;
         }
         if ($year >= 2007) {
             // [5/3, 5/4が日曜]なら、振替休日
-            if (($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) == self::JD_SUNDAY) || ($this->getWeekday(mktime(0, 0, 0, 5, 3, $year)) == self::JD_SUNDAY)) {
-                $res[6] = self::JD_COMPENSATING_HOLIDAY;
+            if (($this->getWeekday(mktime(0, 0, 0, 5, 4, $year)) == self::SUNDAY) || ($this->getWeekday(mktime(0, 0, 0, 5, 3, $year)) == self::SUNDAY)) {
+                $res[6] = self::COMPENSATING_HOLIDAY;
             }
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック六月
+     * +-- 祝日判定ロジック六月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getJuneHoliday($year)
+    protected function getJuneHoliday($year)
     {
         if ($year == '1993') {
-            $res[9] = self::JD_CROWN_PRINCE_NARUHITO_WEDDING;
+            $res[9] = self::CROWN_PRINCE_NARUHITO_WEDDING;
         } else {
             $res = array();
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック七月
+     * +-- 祝日判定ロジック七月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getJulyHoliday($year)
+    protected function getJulyHoliday($year)
     {
         if ($year >= 2003) {
-            $third_monday = $this->getDayByWeekly($year, 7, self::JD_MONDAY, 3);
-            $res[$third_monday] = self::JD_MARINE_DAY;
+            $third_monday = $this->getDayByWeekly($year, 7, self::MONDAY, 3);
+            $res[$third_monday] = self::MARINE_DAY;
         } elseif ($year >= 1996) {
-            $res[20] = self::JD_MARINE_DAY;
+            $res[20] = self::MARINE_DAY;
             //振替休日確認
-            if ($this->getWeekDay(mktime(0, 0, 0, 7, 20, $year)) == self::JD_SUNDAY) {
-                $res[21] = self::JD_COMPENSATING_HOLIDAY;
+            if ($this->getWeekDay(mktime(0, 0, 0, 7, 20, $year)) == self::SUNDAY) {
+                $res[21] = self::COMPENSATING_HOLIDAY;
             }
         } else {
             $res = array();
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック八月
+     * +-- 祝日判定ロジック八月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getAugustHoliday($year)
+    protected function getAugustHoliday($year)
     {
         $res = array();
         if ($year >= 2016) {
-            $res[11] = self::JD_MOUNTAIN_DAY;
+            $res[11] = self::MOUNTAIN_DAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック九月
+     * +-- 祝日判定ロジック九月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getSeptemberHoliday($year)
+    protected function getSeptemberHoliday($year)
     {
         $autumnEquinoxDay = $this->getAutumnEquinoxDay($year);
-        $res[$this->getDay($autumnEquinoxDay)] = self::JD_AUTUMNAL_EQUINOX_DAY;
+        $res[$this->getDay($autumnEquinoxDay)] = self::AUTUMNAL_EQUINOX_DAY;
         //振替休日確認
         if ($this->getWeekDay($autumnEquinoxDay) == 0) {
-            $res[$this->getDay($autumnEquinoxDay)+1] = self::JD_COMPENSATING_HOLIDAY;
+            $res[$this->getDay($autumnEquinoxDay)+1] = self::COMPENSATING_HOLIDAY;
         }
 
         if ($year >= 2003) {
-            $third_monday = $this->getDayByWeekly($year, 9, self::JD_MONDAY, 3);
-            $res[$third_monday] = self::JD_RESPECT_FOR_SENIOR_CITIZENS_DAY;
+            $third_monday = $this->getDayByWeekly($year, 9, self::MONDAY, 3);
+            $res[$third_monday] = self::RESPECT_FOR_SENIOR_CITIZENS_DAY;
 
             //敬老の日と、秋分の日の間の日は休みになる
             if (($this->getDay($autumnEquinoxDay) - 1) == ($third_monday + 1)) {
-                $res[($this->getDay($autumnEquinoxDay) - 1)] = self::JD_NATIONAL_HOLIDAY;
+                $res[($this->getDay($autumnEquinoxDay) - 1)] = self::NATIONAL_HOLIDAY;
             }
 
         } elseif ($year >= 1966) {
-            $res[15] = self::JD_RESPECT_FOR_SENIOR_CITIZENS_DAY;
+            $res[15] = self::RESPECT_FOR_SENIOR_CITIZENS_DAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック十月
+     * +-- 祝日判定ロジック十月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getOctoberHoliday($year)
+    protected function getOctoberHoliday($year)
     {
         if ($year >= 2000) {
             //2000年以降は第二月曜日に変更
-            $second_monday = $this->getDayByWeekly($year, 10, self::JD_MONDAY, 2);
-            $res[$second_monday] = self::JD_SPORTS_DAY;
+            $second_monday = $this->getDayByWeekly($year, 10, self::MONDAY, 2);
+            $res[$second_monday] = self::SPORTS_DAY;
         } elseif ($year >= 1966) {
-            $res[10] = self::JD_SPORTS_DAY;
+            $res[10] = self::SPORTS_DAY;
             //振替休日確認
-            if ($this->getWeekDay(mktime(0, 0, 0, 10, 10, $year)) == self::JD_SUNDAY) {
-                $res[11] = self::JD_COMPENSATING_HOLIDAY;
+            if ($this->getWeekDay(mktime(0, 0, 0, 10, 10, $year)) == self::SUNDAY) {
+                $res[11] = self::COMPENSATING_HOLIDAY;
             }
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック十一月
+     * +-- 祝日判定ロジック十一月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getNovemberHoliday($year)
+    protected function getNovemberHoliday($year)
     {
-        $res[3] = self::JD_CULTURE_DAY;
+        $res[3] = self::CULTURE_DAY;
         //振替休日確認
-        if ($this->getWeekDay(mktime(0, 0, 0, 11, 3, $year)) == self::JD_SUNDAY) {
-            $res[4] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 11, 3, $year)) == self::SUNDAY) {
+            $res[4] = self::COMPENSATING_HOLIDAY;
         }
 
         if ($year == 1990) {
-            $res[12] = self::JD_REGNAL_DAY;
+            $res[12] = self::REGNAL_DAY;
         }
 
-        $res[23] = self::JD_LABOR_THANKSGIVING_DAY;
+        $res[23] = self::LABOR_THANKSGIVING_DAY;
         //振替休日確認
-        if ($this->getWeekDay(mktime(0, 0, 0, 11, 23, $year)) == self::JD_SUNDAY) {
-            $res[24] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 11, 23, $year)) == self::SUNDAY) {
+            $res[24] = self::COMPENSATING_HOLIDAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 祝日判定ロジック十二月
+     * +-- 祝日判定ロジック十二月
      *
      * @param integer $year 年
      * @return array
      */
-    private function getDecemberHoliday($year)
+    protected function getDecemberHoliday($year)
     {
         if ($year >= 1989) {
-            $res[23] = self::JD_THE_EMPEROR_S_BIRTHDAY;
+            $res[23] = self::THE_EMPEROR_S_BIRTHDAY;
         }
-        if ($this->getWeekDay(mktime(0, 0, 0, 12, 23, $year)) == self::JD_SUNDAY) {
-            $res[24] = self::JD_COMPENSATING_HOLIDAY;
+        if ($this->getWeekDay(mktime(0, 0, 0, 12, 23, $year)) == self::SUNDAY) {
+            $res[24] = self::COMPENSATING_HOLIDAY;
         }
         return $res;
     }
+    /* ----------------------------------------- */
+
+    /**
+     * +-- UNIXタイムスタンプ化
+     *
+     * @access      protected
+     * @param       var_text $time_stamp
+     * @return      int
+     */
+    protected function toTimeStamp($time_stamp)
+    {
+        if (is_string($time_stamp) && !ctype_digit($time_stamp)) {
+            $time_stamp = strtotime($time_stamp);
+        }
+        return $time_stamp;
+    }
+    /* ----------------------------------------- */
 
 }

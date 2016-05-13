@@ -30,7 +30,7 @@ class LunarCalendar
     private $tdt;
 
     /**
-     * 旧暦定数
+     * +-- 旧暦定数
      */
     const JD_BEFORE_NIBUN  = 90.0;
     const JD_CHU           = 30.0;
@@ -39,7 +39,7 @@ class LunarCalendar
     const JD_KEY_ORDERED   = 2;
 
     /**
-     * コンストラクタ
+     * +-- コンストラクタ
      *
      * @void
      */
@@ -48,9 +48,10 @@ class LunarCalendar
         $this->k = M_PI / 180;
         $this->tdt = (gmmktime(0,0,0,1,1,2000) - mktime(0,0,0,1,1,2000)) / 86400;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 旧暦カレンダー取得
+     * +-- 旧暦カレンダー取得
      *
      *
      * @param integer $time_stamp ユニックスタイムスタンプ
@@ -65,9 +66,10 @@ class LunarCalendar
             date("d", $time_stamp),
             date("Y", $time_stamp));
     }
+    /* ----------------------------------------- */
 
     /**
-     * タイムスタンプからユリウス暦を取得します。
+     * +-- タイムスタンプからユリウス暦を取得します。
      *
      *
      * @param integer $time_stamp ユニックスタイムスタンプ
@@ -83,9 +85,10 @@ class LunarCalendar
             date("Y", $time_stamp)
         );
     }
+    /* ----------------------------------------- */
 
     /**
-     * 旧暦カレンダーリストを取得
+     * +-- 旧暦カレンダーリストを取得
      *
      *
      * @param array $time_stamp_array
@@ -113,9 +116,10 @@ class LunarCalendar
         return $res;
 
     }
+    /* ----------------------------------------- */
 
     /**
-     * mktimeと同じインターフェイスで、旧暦変換を行う
+     * +-- mktimeと同じインターフェイスで、旧暦変換を行う
      *
      * @param integer $hour 時
      * @param integer $minute 分
@@ -131,9 +135,10 @@ class LunarCalendar
         $m = $this->getTuitachiList($tm, 5);
         return $this->getCalendarByTList($tm, $m);
     }
+    /* ----------------------------------------- */
 
     /**
-     * 朔の一覧取得
+     * +-- 朔の一覧取得
      *
      * @return array
      */
@@ -206,7 +211,7 @@ class LunarCalendar
             if ($this->flce($chu[$a][0]) < $this->flce($tuitachi[$b])
                 &&
                 $this->flce($chu[$a][0]) >= $this->flce($value)
-          ) {
+         ) {
                 $res[$key]["month"] = $res[$key -1]["month"] + 1;
                 if ($res[$key]["month"] > 12) {
                     $res[$key]["month"]-=12;
@@ -223,9 +228,10 @@ class LunarCalendar
 
         return $res;
     }
+    /* ----------------------------------------- */
 
     /**
-     * 朔配列から旧暦を求める。
+     * +-- 朔配列から旧暦を求める。
      *
      * @param array $m 朔配列
      */
@@ -298,6 +304,7 @@ class LunarCalendar
         $kyureki["chuki"] = $kyureki["chuki"][0];
         return $kyureki;
     }
+    /* ----------------------------------------- */
 
 
     /**
@@ -440,7 +447,7 @@ class LunarCalendar
 
 
     /**
-     * 角度正規化
+     * +-- 角度正規化
      * @param float $angle 角度
      * @return float 角度
      */
@@ -457,6 +464,7 @@ class LunarCalendar
         }
         return($angle1);
     }
+    /* ----------------------------------------- */
 
 
     private function celestialLongitudeOfTheSun($t)
