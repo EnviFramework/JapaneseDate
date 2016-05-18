@@ -7,22 +7,30 @@
  * お手数ですが、再配布ご利用の際は、高野英明氏の「旧暦計算サンプルスクリプト」をDLし、
  * 規定に従ってください。<br />
  *
- * @package JapaneseDate
- * @version 2.0
- * @since 1.6
- * @author Akito<akito-artisan@five-foxes.com>
+ * @package    %%project_name%%
+ * @subpackage %%subpackage_name%%
+ * @author     Suzunone <suzunone.eleven@gmail.com>
+ * @copyright  %%your_project%%
+ * @license    %%your_license%%
+ * @link       %%your_link%%
+ * @see        %%your_see%%
+ * @sinse Class available since Release 1.0.0
  */
-
 namespace JapaneseDate;
+
 
 
 /**
  * 旧暦日付クラス
  *
- * @package JapaneseDate
- * @version 2
- * @since 1.6
- * @author Akito<akito-artisan@five-foxes.com>
+ * @package    %%project_name%%
+ * @subpackage %%subpackage_name%%
+ * @author     Suzunone <suzunone.eleven@gmail.com>
+ * @copyright  %%your_project%%
+ * @license    %%your_license%%
+ * @link       %%your_link%%
+ * @see        %%your_see%%
+ * @sinse Class available since Release 1.0.0
  */
 class LunarCalendar
 {
@@ -41,7 +49,8 @@ class LunarCalendar
     /**
      * +-- コンストラクタ
      *
-     * @void
+     * @access      public
+     * @return      void
      */
     public function __construct()
     {
@@ -50,6 +59,13 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+    /**
+     * +-- オブジェクトの生成
+     *
+     * @access      public
+     * @static
+     * @return      \JapaneseDate\LunarCalendar
+     */
     public static function factory()
     {
         static $instance;
@@ -58,12 +74,15 @@ class LunarCalendar
         }
         return $instance;
     }
+    /* ----------------------------------------- */
 
     /**
      * +-- 旧暦カレンダー取得
      *
      *
-     * @param integer $time_stamp ユニックスタイムスタンプ
+     * @access      public
+     * @param       int $time_stamp ユニックスタイムスタンプ
+     * @return      array
      */
     public function getLunarCalendar($time_stamp)
     {
@@ -78,11 +97,13 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+
     /**
      * +-- タイムスタンプからユリウス暦を取得します。
      *
-     *
-     * @param integer $time_stamp ユニックスタイムスタンプ
+     * @access      public
+     * @param       int $time_stamp ユニックスタイムスタンプ
+     * @return      int
      */
     public function time2JD($time_stamp)
     {
@@ -94,12 +115,14 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+
     /**
      * +-- 旧暦カレンダーリストを取得
      *
-     *
-     * @param array $time_stamp_array
-     * $param integer $mode データ取得モード
+     * @access      public
+     * @param       array $time_stamp_array
+     * @param       int    $mode データ取得モード
+     * @return      array
      */
     public function getLunaCalendarList(array $time_array, $mode = self::JD_KEY_ORDERED)
     {
@@ -128,13 +151,13 @@ class LunarCalendar
     /**
      * +-- mktimeと同じインターフェイスで、旧暦変換を行う
      *
-     * @param integer $hour 時
-     * @param integer $minute 分
-     * @param integer $second 秒
-     * @param integer $month 月
-     * @param integer $day 日
-     * @param integer $year 年
-     * @return array
+     * @param       int $hour 時
+     * @param       int $minute 分
+     * @param       int $second 秒
+     * @param       int $month 月
+     * @param       int $day 日
+     * @param       int $year 年
+     * @return      array
      */
     public function getLunarCalendarByMktime($hour, $minute, $second, $month, $day, $year)
     {
@@ -164,10 +187,14 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+
     /**
      * +-- 朔の一覧取得
      *
-     * @return array
+     * @access      private
+     * @param       int $tm0
+     * @param       int $lim
+     * @return      array
      */
     private function getTsuitachiList($tm0, $lim)
     {
@@ -194,18 +221,18 @@ class LunarCalendar
             $Tsuitachi[$i] = $this->getTsuitachi($tm);
             // 前と同じ時刻を計算した場合（両者の差が26日以内）には、初期値を
             // +35日にして再実行させる。
-            if (abs($this->flce($Tsuitachi[$i - 1]) - $this->flce($Tsuitachi[$i])) <= 26.0) {
+            if (abs($this->rounding($Tsuitachi[$i - 1]) - $this->rounding($Tsuitachi[$i])) <= 26.0) {
                 $Tsuitachi[$i] = $this->getTsuitachi($Tsuitachi[$i - 1] + 35.0);
             }
         }
 
-        if ($this->flce($Tsuitachi[1]) <= $this->flce($nibun[0][0])) {
+        if ($this->rounding($Tsuitachi[1]) <= $this->rounding($nibun[0][0])) {
             // 二分二至の時刻以前になってしまった場合には、朔の時刻を繰り下げて修正する。
             for ($i = 0; $i < $lim; $i++) {
                 $Tsuitachi[$i] = $Tsuitachi[$i + 1];
             }
             $Tsuitachi[4] = $this->getTsuitachi($Tsuitachi[3] + 35.0);
-         } elseif ($this->flce($Tsuitachi[0]) > $this->flce($nibun[0][0])) {
+         } elseif ($this->rounding($Tsuitachi[0]) > $this->rounding($nibun[0][0])) {
             // 二分二至の時刻以後になってしまった場合、朔の時刻を繰り上げて修正する。
              for ($i = 4 ; $i > 0; $i--) {
                 $Tsuitachi[$i] = $Tsuitachi[$i - 1];
@@ -217,9 +244,9 @@ class LunarCalendar
         // 閏月カウント
         $uruu_count = 0;
         foreach ($Tsuitachi as $key => $value) {
-            $res[$key]['jd']    = $this->flce($value);
+            $res[$key]['jd']    = $this->rounding($value);
             if ($key == 0) {
-                $res[$key]['month'] = $this->flce($chu[0][1] / 30.0) + 2;
+                $res[$key]['month'] = $this->rounding($chu[0][1] / 30.0) + 2;
                 if ($res[$key]['month'] > 12) {
                     $res[$key]['month']-=12;
                 }
@@ -235,8 +262,8 @@ class LunarCalendar
                 continue;
             }
 
-            if ($this->flce($chu[$a][0]) < $this->flce($Tsuitachi[$b]) &&
-            $this->flce($chu[$a][0]) >= $this->flce($value)) {
+            if ($this->rounding($chu[$a][0]) < $this->rounding($Tsuitachi[$b]) &&
+            $this->rounding($chu[$a][0]) >= $this->rounding($value)) {
                 $res[$key]['month'] = $res[$key -1]['month'] + 1;
                 if ($res[$key]['month'] > 12) {
                     $res[$key]['month']-=12;
@@ -260,7 +287,7 @@ class LunarCalendar
      *
      * @access      private
      * @param       var_text $m
-     * @return      void
+     * @return      int
      */
     private function getKyurekiID($jd, $m)
     {
@@ -285,12 +312,17 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+
     /**
      * +-- 朔配列から旧暦を求める。
      *
-     * @param array $m 朔配列
+     * @access      private
+     * @param       int $jd
+     * @param       array $m
+     * @param       int $i OPTIONAL:NULL
+     * @return      void
      */
-    private function getCalendarByTList($jd, $m, $i = NULL)
+    private function getCalendarByTList($jd, array $m, $i = NULL)
     {
         if ($i === NULL) {
             $i = $this->getKyurekiID($jd, $m);
@@ -328,7 +360,7 @@ class LunarCalendar
         $kyureki['illumi'] = (1 - cos($this->k * $this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)))) * 50;
 
         // 月相を求める（輝面比の計算で求めた変数 t を使用）
-        $kyureki['mphase'] = $this->flce($this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)) / 360 * 28 + .5);
+        $kyureki['mphase'] = $this->rounding($this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)) / 360 * 28 + .5);
         if($kyureki['mphase'] == 28) {
             $kyureki['mphase'] = 0;
         }
@@ -339,7 +371,7 @@ class LunarCalendar
 
         // ユリウス暦
         $kyureki['jd'] = $jd;
-        $kyureki['chuki'][0] = $this->flce($kyureki['chuki'][0]);
+        $kyureki['chuki'][0] = $this->rounding($kyureki['chuki'][0]);
 
         // 中気かどうか
         if ($kyureki['chuki'][0] && $kyureki['chuki'][0] == $kyureki['jd']) {
@@ -356,15 +388,15 @@ class LunarCalendar
     /**
      * +-- 中気の取得
      *
-     * @access private
-     * @params  $tm
-     * @params  $longitude OPTIONAL:self::JD_CHU
-     * @return array
+     * @access      private
+     * @param       int $tm
+     * @param       int $longitude OPTIONAL:self::JD_CHU
+     * @return      array
      */
     private function getChu($tm, $longitude = self::JD_CHU)
     {
         // 時刻引数を分解する
-        $tm1 = $this->flce($tm);
+        $tm1 = $this->rounding($tm);
         $tm2 = $tm - $tm1;
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
         $tm2 -= $this->tdt;
@@ -372,7 +404,7 @@ class LunarCalendar
         $t = ($tm2 + 0.5) / 36525.0;
         $t = $t + ($tm1 - 2451545.0) / 36525.0;
         $rm_sun  = $this->celestialLongitudeOfTheSun($t);
-        $rm_sun0 = $longitude * $this->flce($rm_sun / $longitude);
+        $rm_sun0 = $longitude * $this->rounding($rm_sun / $longitude);
         // 繰り返し計算によって中気の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
@@ -392,7 +424,7 @@ class LunarCalendar
             }
         // 時刻引数の補正値 △t
         // delta_t = delta_rm * 365.2 / 360.0;
-            $delta_t1 = $this->flce($delta_rm * 365.2 / 360.0);
+            $delta_t1 = $this->rounding($delta_rm * 365.2 / 360.0);
             $delta_t2 = $delta_rm * 365.2 / 360.0;
             $delta_t2 -= $delta_t1;
         // 時刻引数の補正
@@ -420,16 +452,16 @@ class LunarCalendar
     /**
      * +-- 朔の取得
      *
-     * @access private
-     * @params  $tm
-     * @return integer
+     * @access      private
+     * @param       int $tm
+     * @return      int
      */
     private function getTsuitachi($tm)
     {
         // ループカウンタのセット
         $lc=1;
         // 時刻引数を分解する
-        $tm1 = $this->flce($tm);
+        $tm1 = $this->rounding($tm);
         $tm2 = $tm - $tm1;
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
         $tm2 -= $this->tdt;
@@ -462,7 +494,7 @@ class LunarCalendar
             }
             // 時刻引数の補正値 △t
             // delta_t = delta_rm * 29.530589 / 360.0;
-            $delta_t1 = $this->flce($delta_rm * 29.530589 / 360.0);
+            $delta_t1 = $this->rounding($delta_rm * 29.530589 / 360.0);
             $delta_t2 = $delta_rm * 29.530589 / 360.0;
             $delta_t2 -= $delta_t1;
             // 時刻引数の補正
@@ -475,7 +507,7 @@ class LunarCalendar
 
             if ($lc == 15 && abs($delta_t1 + $delta_t2) > (1.0 / 86400.0)) {
                 // ループ回数が15回になったら、初期値 tm を tm-26 とする。
-                $tm1 = $this->flce($tm-26);
+                $tm1 = $this->rounding($tm-26);
                 $tm2 = 0;
             } elseif ($lc > 30 && abs($delta_t1 + $delta_t2) > (1.0 / 86400.0)) {
                 // 初期値を補正したにも関わらず、振動を続ける場合には初期値を答えとして
@@ -494,25 +526,31 @@ class LunarCalendar
 
     /**
      * +-- 角度正規化
-     * @param float $angle 角度
-     * @return float 角度
+     * @param       float $angle 角度
+     * @return      float 角度
      */
     private function angleNormalize($angle)
     {
         if ($angle < 0.0) {
             $angle1 = -$angle;
-            $angle2 = $this->flce($angle1 / 360.0);
+            $angle2 = $this->rounding($angle1 / 360.0);
             $angle1 -= 360.0 * $angle2;
             $angle1 = 360.0 - $angle1;
         } else{
-            $angle1 = $this->flce($angle / 360.0);
+            $angle1 = $this->rounding($angle / 360.0);
             $angle1 = $angle - 360.0 * $angle1;
         }
         return($angle1);
     }
     /* ----------------------------------------- */
 
-
+    /**
+     * +--
+     *
+     * @access      private
+     * @param       var_text $t
+     * @return      float
+     */
     private function celestialLongitudeOfTheSun($t)
     {
         $ang = $this->angleNormalize(31557.0 * $t + 161.0);
@@ -552,7 +590,15 @@ class LunarCalendar
         $th  = $this->angleNormalize($th + $ang);
         return($th);
     }
+    /* ----------------------------------------- */
 
+    /**
+     * +--
+     *
+     * @access      private
+     * @param       var_text $t
+     * @return      float
+     */
     private function celestialLongitudeOfTheMoon($t)
     {
         // 摂動項の計算
@@ -684,23 +730,34 @@ class LunarCalendar
         $th  = $this->angleNormalize($th + $ang);
         return($th);
     }
+    /* ----------------------------------------- */
 
+    /**
+     * +-- ユリウス積算日変換
+     *
+     * @access      private
+     * @param       var_text $month
+     * @param       var_text $day
+     * @param       var_text $year
+     * @return      int
+     */
     private function makeJD($month, $day, $year)
     {
         $res =  gregoriantojd((int)$month, (int)$day, (int)$year);
         return $res;
     }
+    /* ----------------------------------------- */
 
     private function JD2DateArray($JD)
     {
-        $x0 = $this->flce($JD + 68570.0);
-        $x1 = $this->flce($x0 / 36524.25);
-        $x2 = $x0 - $this->flce(36524.25 * $x1 + 0.75);
-        $x3 = $this->flce(($x2 + 1) / 365.2425);
-        $x4 = $x2 - $this->flce(365.25 * $x3) + 31.0;
-        $x5 = $this->flce($this->flce($x4) / 30.59);
-        $x6 = $this->flce($this->flce($x5) / 11.0);
-        $res[2] = $x4 - $this->flce(30.59 * $x5);
+        $x0 = $this->rounding($JD + 68570.0);
+        $x1 = $this->rounding($x0 / 36524.25);
+        $x2 = $x0 - $this->rounding(36524.25 * $x1 + 0.75);
+        $x3 = $this->rounding(($x2 + 1) / 365.2425);
+        $x4 = $x2 - $this->rounding(365.25 * $x3) + 31.0;
+        $x5 = $this->rounding($this->rounding($x4) / 30.59);
+        $x6 = $this->rounding($this->rounding($x5) / 11.0);
+        $res[2] = $x4 - $this->rounding(30.59 * $x5);
         $res[1] = $x5 - 12 * $x6 + 2;
         $res[0] = 100 * ($x1 - 49) + $x3 + $x6;
         // 2月30日の補正
@@ -713,20 +770,16 @@ class LunarCalendar
                 $res[2] = 28;
             }
         }
-        $tm = 86400.0 * ($JD - $this->flce($JD));
-        $res[3] = $this->flce($tm / 3600.0);
-        $res[4] = $this->flce(($tm - 3600.0 * $res[3]) / 60.0);
-        $res[5] = $this->flce($tm - 3600.0 * $res[3] - 60 * $res[4]);
+        $tm = 86400.0 * ($JD - $this->rounding($JD));
+        $res[3] = $this->rounding($tm / 3600.0);
+        $res[4] = $this->rounding(($tm - 3600.0 * $res[3]) / 60.0);
+        $res[5] = $this->rounding($tm - 3600.0 * $res[3] - 60 * $res[4]);
         return array($res[0], $res[1], $res[2], $res[3], $res[4], $res[5]);
     }
 
 
-    private function flce($in)
+    private function rounding($in)
     {
-        if ($in > 0) {
-            return floor($in);
-        } else {
-            return ceil($in);
-        }
+        return $in > 0 ? floor($in) : ceil($in);
     }
 }

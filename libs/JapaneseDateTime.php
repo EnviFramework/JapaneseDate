@@ -20,6 +20,7 @@ use \JapaneseDate\LunarCalendar;
 
 
 
+
 /**
  * @package    %%project_name%%
  * @subpackage %%subpackage_name%%
@@ -299,7 +300,8 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた休日名を返す
      *
-     * @return string
+     * @access      public
+     * @return      string
      */
     public function viewHoliday()
     {
@@ -311,7 +313,8 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた曜日名を返す
      *
-     * @return string
+     * @access      public
+     * @return      string
      */
     public function viewWeekday()
     {
@@ -324,6 +327,7 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた旧暦月名を返す
      *
+     * @access      public
      * @return string
      */
     public function viewMonth()
@@ -350,8 +354,9 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた六曜名を返す
      *
-     * @param integer $key 六曜キー
-     * @return string
+     * @access      public
+     * @param       integer $key 六曜キー
+     * @return      string
      */
     public function viewSixWeekday()
     {
@@ -364,8 +369,9 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた干支を返す
      *
-     * @param integer $key 干支キー
-     * @return string
+     * @access      public
+     * @param       integer $key 干支キー
+     * @return      string
      */
     public function viewOrientalZodiac()
     {
@@ -377,7 +383,8 @@ class JapaneseDateTime extends DateTime
     /**
      * +-- 日本語フォーマットされた年号を返す
      *
-     * @return string
+     * @access      public
+     * @return      string
      */
     public function viewEraName()
     {
@@ -636,9 +643,16 @@ class JapaneseDateTime extends DateTime
     }
     /* ----------------------------------------- */
 
+    /**
+     * +-- 比較用のYMD
+     *
+     * @access      public
+     * @return      int
+     */
     public function getCompareFormat()
     {
         return (int)$this->format('Ymd');
     }
+    /* ----------------------------------------- */
 
 }

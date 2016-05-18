@@ -2,10 +2,14 @@
 /**
  * 日本語/和暦日付クラスメインファイル
  *
- * @package JapaneseDate
- * @version 2.0
- * @since 0.1
- * @author Akito<akito-artisan@five-foxes.com>
+ * @package    %%project_name%%
+ * @subpackage %%subpackage_name%%
+ * @author     Suzunone <suzunone.eleven@gmail.com>
+ * @copyright  %%your_project%%
+ * @license    %%your_license%%
+ * @link       %%your_link%%
+ * @see        %%your_see%%
+ * @sinse Class available since Release 1.0.0
  */
 
 
@@ -16,10 +20,14 @@ use \JapaneseDateTime;
 /**
  * 日本語/和暦日付クラス
  *
- * @package JapaneseDate
- * @version 2.0
- * @since 0.1
- * @author Akito<akito-artisan@five-foxes.com>
+ * @package    %%project_name%%
+ * @subpackage %%subpackage_name%%
+ * @author     Suzunone <suzunone.eleven@gmail.com>
+ * @copyright  %%your_project%%
+ * @license    %%your_license%%
+ * @link       %%your_link%%
+ * @see        %%your_see%%
+ * @sinse Class available since Release 1.0.0
  */
 class JapaneseDate
 {
@@ -62,7 +70,7 @@ class JapaneseDate
      *
      * @access public
      * @params
-     * @return void
+     * @return      void
      */
     public function __construct()
     {
@@ -106,11 +114,11 @@ class JapaneseDate
     /* ----------------------------------------- */
 
     /**
-     * +--
+     * +-- ファクトリー
      *
      * @access      public
      * @static
-     * @return      void
+     * @return      JapaneseDate
      */
     public static function factory()
     {
@@ -127,8 +135,9 @@ class JapaneseDate
     /**
      * +-- 指定月の祝日リストを取得する
      *
-     * @param JapaneseDateTime $JapaneseDateTime JapaneseDateTime
-     * @return array
+     * @access      public
+     * @param       JapaneseDateTime $JapaneseDateTime JapaneseDateTime
+     * @return      array
      */
     public function getHolidayList(JapaneseDateTime $JapaneseDateTime)
     {
@@ -157,8 +166,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた休日名を返す
      *
-     * @param integer $key 休日キー
-     * @return string
+     * @access      public
+     * @param       int $key 休日キー
+     * @return      string
      */
     public function viewHoliday($key)
     {
@@ -169,8 +179,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた曜日名を返す
      *
-     * @param integer $key 曜日キー
-     * @return string
+     * @access      public
+     * @param       int $key 曜日キー
+     * @return      string
      */
     public function viewWeekday($key)
     {
@@ -182,8 +193,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた旧暦月名を返す
      *
-     * @param integer $key 月キー
-     * @return string
+     * @access      public
+     * @param       int $key 月キー
+     * @return      string
      */
     public function viewMonth($key)
     {
@@ -195,8 +207,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた六曜名を返す
      *
-     * @param integer $key 六曜キー
-     * @return string
+     * @access      public
+     * @param       int $key 六曜キー
+     * @return      string
      */
     public function viewSixWeekday($key)
     {
@@ -208,8 +221,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた戦争中曜日名を返す
      *
-     * @param integer $key 曜日キー
-     * @return string
+     * @access      public
+     * @param       int $key 曜日キー
+     * @return      string
      */
     public function viewWarWeekday($key)
     {
@@ -220,8 +234,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた干支を返す
      *
-     * @param integer $key 干支キー
-     * @return string
+     * @access      public
+     * @param       int $key 干支キー
+     * @return      string
      */
     public function viewOrientalZodiac($key)
     {
@@ -232,8 +247,9 @@ class JapaneseDate
     /**
      * +-- 日本語フォーマットされた年号を返す
      *
-     * @param integer $key 年号キー
-     * @return string
+     * @access      public
+     * @param       int $key 年号キー
+     * @return      string
      */
     public function viewEraName($key)
     {
@@ -244,8 +260,9 @@ class JapaneseDate
     /**
      * +-- 春分の日を取得
      *
-     * @param integer $time_stamp タイムスタンプ
-     * @return integer タイムスタンプ
+     * @access      public
+     * @param       int $time_stamp タイムスタンプ
+     * @return      int タイムスタンプ
      */
     public function getVernalEquinoxDay($year)
     {
@@ -265,8 +282,9 @@ class JapaneseDate
     /**
      * +-- 秋分の日を取得
      *
-     * @param integer $time_stamp タイムスタンプ
-     * @return integer タイムスタンプ
+     * @access      public
+     * @param       int $time_stamp タイムスタンプ
+     * @return      int タイムスタンプ
      */
     public function getAutumnEquinoxDay($year)
     {
@@ -286,8 +304,9 @@ class JapaneseDate
     /**
      * +-- タイムスタンプを展開して、日付の詳細配列を取得する
      *
-     * @param integer $time_stamp タイムスタンプ
-     * @return integer タイムスタンプ
+     * @access      public
+     * @param       int $time_stamp タイムスタンプ
+     * @return      int タイムスタンプ
      */
     public function makeDateArray($time_stamp)
     {
@@ -308,11 +327,12 @@ class JapaneseDate
     /**
      * +-- 第○ ■曜日の日付を取得します。
      *
-     * @param integer $year 年
-     * @param integer $month 月
-     * @param integer $weekly 曜日
-     * @param integer $renb 何週目か
-     * @return int
+     * @access      public
+     * @param       int $year 年
+     * @param       int $month 月
+     * @param       int $weekly 曜日
+     * @param       int $renb 何週目か
+     * @return      int
      */
     public function getDayByWeekly($year, $month, $weekly, $renb = 1, $timezone = NULL)
     {
@@ -349,8 +369,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック一月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getJanuaryHoliday($year, $timezone)
     {
@@ -382,8 +403,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック二月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getFebruaryHoliday($year, $timezone)
     {
@@ -406,8 +428,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック三月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getMarchHoliday($year, $timezone)
     {
@@ -428,8 +451,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック四月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getAprilHoliday($year, $timezone)
     {
@@ -458,8 +482,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック五月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getMayHoliday($year, $timezone)
     {
@@ -501,8 +526,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック六月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getJuneHoliday($year, $timezone)
     {
@@ -522,8 +548,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック七月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getJulyHoliday($year, $timezone)
     {
@@ -550,8 +577,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック八月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getAugustHoliday($year, $timezone)
     {
@@ -573,8 +601,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック九月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getSeptemberHoliday($year, $timezone)
     {
@@ -613,8 +642,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック十月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getOctoberHoliday($year, $timezone)
     {
@@ -640,8 +670,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック十一月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getNovemberHoliday($year, $timezone)
     {
@@ -671,8 +702,9 @@ class JapaneseDate
     /**
      * +-- 祝日判定ロジック十二月
      *
-     * @param integer $year 年
-     * @return array
+     * @access      protected
+     * @param       int $year 年
+     * @return      array
      */
     protected function getDecemberHoliday($year, $timezone)
     {
@@ -697,7 +729,7 @@ class JapaneseDate
      * +-- 七曜を数値化して返します
      *
      *
-     * @access      public
+     * @access      protected
      * @return      int
      */
     protected function getWeekday($time_stamp)
@@ -710,7 +742,7 @@ class JapaneseDate
      * +-- 年を数値化して返します
      *
      *
-     * @access      public
+     * @access      protected
      * @return      int
      */
     protected function getYear($time_stamp)
@@ -723,7 +755,7 @@ class JapaneseDate
      * +-- 月を数値化して返します
      *
      *
-     * @access      public
+     * @access      protected
      * @return      int
      */
     protected function getMonth($time_stamp)
@@ -735,7 +767,7 @@ class JapaneseDate
     /**
      * +-- 日を数値化して返します
      *
-     * @access      public
+     * @access      protected
      * @return      int
      *
      */

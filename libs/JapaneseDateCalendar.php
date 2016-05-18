@@ -141,7 +141,7 @@ class JapaneseDateCalendar
      * 除く場合true、そうでない場合false
      *
      * @access      public
-     * @param       var_text $val
+     * @param       bool $val
      * @return      JapaneseDateTimeWorkingDay
      */
     public function setBypassHoliday($val)
@@ -154,13 +154,14 @@ class JapaneseDateCalendar
     /**
      * +-- 期間内の営業日を取得する
      *
-     * @param integer|string $JDT_end 取得終了日
-     * @return array
+     * @access      public
+     * @param       int|string $JDT_end 取得終了日
+     * @return      array
      */
     public function getWorkingDayBySpan($JDT_end)
     {
         $JDT_end = $this->JapaneseDateTime($JDT_end);
-        $JDT = clone $this->start_time_stamp;
+        $JDT     = clone $this->start_time_stamp;
         $end_compare = $JDT_end->getCompareFormat();
 
         $res = array();
@@ -179,6 +180,8 @@ class JapaneseDateCalendar
     /**
      * +-- 当月のカレンダー配列を取得します
      *
+     * @access      public
+     * @return      array
      */
     public static function getCalendar()
     {
@@ -210,8 +213,9 @@ class JapaneseDateCalendar
      *
      * getWorkingDayByLimitへのエイリアスです。
      *
-     * @param integer integer $lim_day 取得日数
-     * @return array
+     * @access      public
+     * @param       int $lim_day 取得日数
+     * @return      array
      */
     public function getWorkingDay($lim_day)
     {
@@ -222,8 +226,9 @@ class JapaneseDateCalendar
     /**
      * +-- 営業日を取得します
      *
-     * @param integer integer $lim_day 取得日数
-     * @return array
+     * @access      public
+     * @param       int $lim_day 取得日数
+     * @return      array
      */
     public function getWorkingDayByLimit($lim_day)
     {
