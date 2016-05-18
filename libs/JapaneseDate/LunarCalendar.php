@@ -50,6 +50,15 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
+    public static function factory()
+    {
+        static $instance;
+        if (!$instance) {
+            $instance = new \JapaneseDate\LunarCalendar;
+        }
+        return $instance;
+    }
+
     /**
      * +-- 旧暦カレンダー取得
      *
@@ -64,7 +73,8 @@ class LunarCalendar
             date("s", $time_stamp),
             date("m", $time_stamp),
             date("d", $time_stamp),
-            date("Y", $time_stamp));
+            date("Y", $time_stamp)
+        );
     }
     /* ----------------------------------------- */
 
@@ -77,9 +87,6 @@ class LunarCalendar
     public function time2JD($time_stamp)
     {
         return $this->makeJD(
-            date("H", $time_stamp),
-            date("i", $time_stamp),
-            date("s", $time_stamp),
             date("m", $time_stamp),
             date("d", $time_stamp),
             date("Y", $time_stamp)
@@ -101,16 +108,16 @@ class LunarCalendar
         $lim += (date("m", $time_array[count($time_array) - 1]) - date("m", $time_array[0]));
 
         $tm = $this->time2JD($time_array[0]);
-        $m = $this->getTuitachiList($tm, $lim + 6);
+        $m = $this->getTsuitachiList($tm, $lim + 6);
         if ($mode == self::JD_KEY_ORDERED) {
             foreach ($time_array as $key => $time) {
                 $res[$key]         = $this->getCalendarByTList($this->time2JD($time), $m);
-                $res[$key]["time"] = $time;
+                $res[$key]['time'] = $time;
             }
         } else {
             foreach ($time_array as $key => $time) {
                 $res[$time]         = $this->getCalendarByTList($this->time2JD($time), $m);
-                $res[$time]["time"] = $time;
+                $res[$time]['time'] = $time;
             }
         }
         return $res;
@@ -131,9 +138,29 @@ class LunarCalendar
      */
     public function getLunarCalendarByMktime($hour, $minute, $second, $month, $day, $year)
     {
-        $tm = $this->makeJD($hour, $minute, $second, $month, $day, $year);
-        $m = $this->getTuitachiList($tm, 5);
-        return $this->getCalendarByTList($tm, $m);
+        static $tsuitachi_list;
+        $lim = 12;
+
+        $tm = $this->makeJD($month, $day, $year);
+        if (isset($tsuitachi_list[$tm])) {
+            $m = $tsuitachi_list[$tm];
+            $kyureki_id = $this->getKyurekiID($tm, $m);
+        } elseif (!empty($tsuitachi_list)) {
+            foreach ($tsuitachi_list as  $k => $val) {
+                $kyureki_id = $this->getKyurekiID($tm, $val);
+                if ($kyureki_id <= $lim && $kyureki_id >= 1) {
+                    $m = $val;
+                    break;
+                }
+            }
+        }
+        if (!isset($m)) {
+            $m                   = $this->getTsuitachiList($tm, $lim + 6);
+            $tsuitachi_list[$tm] = $m;
+            $kyureki_id          = $this->getKyurekiID($tm, $m);
+        }
+
+        return $this->getCalendarByTList($tm, $m, $kyureki_id);
     }
     /* ----------------------------------------- */
 
@@ -142,13 +169,13 @@ class LunarCalendar
      *
      * @return array
      */
-    private function getTuitachiList($tm0, $lim)
+    private function getTsuitachiList($tm0, $lim)
     {
         // 計算対象の直前にあたる二分二至の時刻を求める
         list($nibun[0][0], $nibun[0][1]) = $this->getChu($tm0, self::JD_BEFORE_NIBUN);
 
         // 計算対象の直前にあたる二分二至の直前の朔の時刻を求める
-        $tuitachi[0] = $this->getTuitachi($nibun[0][0]);
+        $Tsuitachi[0] = $this->getTsuitachi($nibun[0][0]);
         if ($nibun[0][1] % 30) {
             list($chu[0][0], $chu[0][1]) = $this->getChu($nibun[0][0]);
         } else {
@@ -162,66 +189,64 @@ class LunarCalendar
 
         // 朔の時刻を求める
         for ($i = 1; $i <= $lim; $i++) {
-            $tm = $tuitachi[$i - 1];
+            $tm = $Tsuitachi[$i - 1];
             $tm += 30.0;
-            $tuitachi[$i] = $this->getTuitachi($tm);
+            $Tsuitachi[$i] = $this->getTsuitachi($tm);
             // 前と同じ時刻を計算した場合（両者の差が26日以内）には、初期値を
             // +35日にして再実行させる。
-            if (abs($this->flce($tuitachi[$i - 1]) - $this->flce($tuitachi[$i])) <= 26.0) {
-                $tuitachi[$i] = $this->getTuitachi($tuitachi[$i - 1] + 35.0);
+            if (abs($this->flce($Tsuitachi[$i - 1]) - $this->flce($Tsuitachi[$i])) <= 26.0) {
+                $Tsuitachi[$i] = $this->getTsuitachi($Tsuitachi[$i - 1] + 35.0);
             }
         }
 
-        if ($this->flce($tuitachi[1]) <= $this->flce($nibun[0][0])) {
+        if ($this->flce($Tsuitachi[1]) <= $this->flce($nibun[0][0])) {
             // 二分二至の時刻以前になってしまった場合には、朔の時刻を繰り下げて修正する。
             for ($i = 0; $i < $lim; $i++) {
-                $tuitachi[$i] = $tuitachi[$i + 1];
+                $Tsuitachi[$i] = $Tsuitachi[$i + 1];
             }
-            $tuitachi[4] = $this->getTuitachi($tuitachi[3] + 35.0);
-         } elseif ($this->flce($tuitachi[0]) > $this->flce($nibun[0][0])) {
+            $Tsuitachi[4] = $this->getTsuitachi($Tsuitachi[3] + 35.0);
+         } elseif ($this->flce($Tsuitachi[0]) > $this->flce($nibun[0][0])) {
             // 二分二至の時刻以後になってしまった場合、朔の時刻を繰り上げて修正する。
              for ($i = 4 ; $i > 0; $i--) {
-                $tuitachi[$i] = $tuitachi[$i - 1];
+                $Tsuitachi[$i] = $Tsuitachi[$i - 1];
             }
-            $tuitachi[0] = $this->getTuitachi($tuitachi[0] - 27.0);
+            $Tsuitachi[0] = $this->getTsuitachi($Tsuitachi[0] - 27.0);
         }
 
 
         // 閏月カウント
         $uruu_count = 0;
-        foreach ($tuitachi as $key => $value) {
-            $res[$key]["jd"]    = $this->flce($value);
+        foreach ($Tsuitachi as $key => $value) {
+            $res[$key]['jd']    = $this->flce($value);
             if ($key == 0) {
-                $res[$key]["month"] = $this->flce($chu[0][1] / 30.0) + 2;
-                if ($res[$key]["month"] > 12) {
-                    $res[$key]["month"]-=12;
+                $res[$key]['month'] = $this->flce($chu[0][1] / 30.0) + 2;
+                if ($res[$key]['month'] > 12) {
+                    $res[$key]['month']-=12;
                 }
-                $res[$key]["uruu"]  = false;
-                $res[$key]["chuki"] = $chu[$key];
+                $res[$key]['uruu']  = false;
+                $res[$key]['chuki'] = $chu[$key];
                 continue;
             }
 
             $a = $key - $uruu_count;
             $b = $key + 1;
 
-            if (!isset($tuitachi[$b])) {
+            if (!isset($Tsuitachi[$b])) {
                 continue;
             }
 
-            if ($this->flce($chu[$a][0]) < $this->flce($tuitachi[$b])
-                &&
-                $this->flce($chu[$a][0]) >= $this->flce($value)
-         ) {
-                $res[$key]["month"] = $res[$key -1]["month"] + 1;
-                if ($res[$key]["month"] > 12) {
-                    $res[$key]["month"]-=12;
+            if ($this->flce($chu[$a][0]) < $this->flce($Tsuitachi[$b]) &&
+            $this->flce($chu[$a][0]) >= $this->flce($value)) {
+                $res[$key]['month'] = $res[$key -1]['month'] + 1;
+                if ($res[$key]['month'] > 12) {
+                    $res[$key]['month']-=12;
                 }
-                $res[$key]["uruu"]  = false;
-                $res[$key]["chuki"] = $chu[$key + 1 - $uruu_count];
+                $res[$key]['uruu']  = false;
+                $res[$key]['chuki'] = $chu[$key + 1 - $uruu_count];
             } else {
-                $res[$key]["month"] = $res[$key -1]["month"];
-                $res[$key]["uruu"]  = true;
-                $res[$key]["chuki"] = false;
+                $res[$key]['month'] = $res[$key -1]['month'];
+                $res[$key]['uruu']  = true;
+                $res[$key]['chuki'] = false;
                 $uruu_count++;
             }
         }
@@ -231,77 +256,98 @@ class LunarCalendar
     /* ----------------------------------------- */
 
     /**
-     * +-- 朔配列から旧暦を求める。
+     * +--
      *
-     * @param array $m 朔配列
+     * @access      private
+     * @param       var_text $m
+     * @return      void
      */
-    private function getCalendarByTList($tm0, $m)
+    private function getKyurekiID($jd, $m)
     {
-        $state = 0;
+        $state = false;
         for ($i = 0; $i < count($m); $i++) {
-            if ($this->flce($tm0) < $this->flce($m[$i]["jd"])) {
-                $state = 1;
+            if ($jd < $m[$i]['jd']) {
+                $state = true;
                 break;
-            } elseif ($this->flce($tm0) == $this->flce($m[$i]["jd"])) {
-                $state = 2;
+            } elseif ($jd == $m[$i]['jd']) {
+                $state = true;
                 break;
             }
         }
 
-        if ($state == 0 || $state == 1) {
-            $i--;
+        $i--;
+
+        if (!$state) {
+            return 0;
+        }
+
+        return max($i, 0);
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +-- 朔配列から旧暦を求める。
+     *
+     * @param array $m 朔配列
+     */
+    private function getCalendarByTList($jd, $m, $i = NULL)
+    {
+        if ($i === NULL) {
+            $i = $this->getKyurekiID($jd, $m);
         }
 
         $kyureki = $m[$i];
 
+
         // 旧暦年の計算
-        $gc = $this->JD2DateArray($tm0);
-        $kyureki["year"] = $gc[0];
-        if ($kyureki["month"] > 9 && $kyureki["month"] > $gc[1]) {
-            $kyureki["year"]--;
+        $gc = $this->JD2DateArray($jd);
+        $kyureki['year'] = $gc[0];
+        if ($kyureki['month'] > 9 && $kyureki['month'] > $gc[1]) {
+            $kyureki['year']--;
         }
 
-        $kyureki["day"]=$this->flce($tm0)-$this->flce($m[$i]["jd"]) + 1;
-        $kyureki["time_stamp"] = mktime(0, 0, 0, $kyureki["month"], $kyureki["day"], $kyureki["year"]);
+        $kyureki['day'] = $jd - $kyureki['jd'];
+        $kyureki['time_stamp'] = mktime(0, 0, 0, $kyureki['month'], $kyureki['day'], $kyureki['year']);
 
         // 月齢を求める
-        $kyureki["mage"] = $tm0 - $m[$i]["jd"];
-        if($kyureki["mage"] < 0) {
-            $kyureki["mage"] = $tm0 - $m[$i - 1]["jd"];
+        $kyureki['mage'] = $jd - $kyureki['jd'];
+        if($kyureki['mage'] < 0) {
+            $kyureki['mage'] = $jd - $m[$i - 1]['jd'];
         }
-        $kyureki["magenoon"] = $this->flce($tm0) + 0.5 - $m[$i]["jd"];
-        if($kyureki["magenoon"] < 0) {
-            $kyureki["magenoon"] = $this->flce($tm0) + .5 - $m[$i - 1]["jd"];
+        $kyureki['magenoon'] = $jd + 0.5 - $kyureki['jd'];
+        if($kyureki['magenoon'] < 0) {
+            $kyureki['magenoon'] = $jd + .5 - $m[$i - 1]['jd'];
         }
         // 輝面比を求める
-        $tm1 = $this->flce($tm0);
-        $tm2 = $tm0 - $tm1;
+        $tm1 = $jd;
+        $tm2 = $jd - $tm1;
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
         $tm2-=$this->tdt;
         $t = ($tm2 + 0.5) / 36525.0;
         $t = $t + ($tm1-2451545.0) / 36525.0;
-        $kyureki["illumi"] = (1 - cos($this->k * $this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)))) * 50;
+        $kyureki['illumi'] = (1 - cos($this->k * $this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)))) * 50;
 
         // 月相を求める（輝面比の計算で求めた変数 t を使用）
-        $kyureki["mphase"] = $this->flce($this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)) / 360 * 28 + .5);
-        if($kyureki["mphase"] == 28) {
-            $kyureki["mphase"] = 0;
+        $kyureki['mphase'] = $this->flce($this->angleNormalize($this->celestialLongitudeOfTheMoon($t) - $this->celestialLongitudeOfTheSun($t)) / 360 * 28 + .5);
+        if($kyureki['mphase'] == 28) {
+            $kyureki['mphase'] = 0;
         }
 
         // 朔
-        $kyureki["tuitachi_jd"] = $m[$i]["jd"];
+        $kyureki['tsuitachi_jd'] = $kyureki['jd'];
+
 
         // ユリウス暦
-        $kyureki["jd"] = $tm0;
-        $kyureki["chuki"][0] = $this->flce($kyureki["chuki"][0]);
+        $kyureki['jd'] = $jd;
+        $kyureki['chuki'][0] = $this->flce($kyureki['chuki'][0]);
 
         // 中気かどうか
-        if ($kyureki["chuki"][0] && $kyureki["chuki"][0] == $kyureki["jd"]) {
-            $kyureki["is_chuki"] = $kyureki["chuki"][1];
+        if ($kyureki['chuki'][0] && $kyureki['chuki'][0] == $kyureki['jd']) {
+            $kyureki['is_chuki'] = $kyureki['chuki'][1];
         } else {
-            $kyureki["is_chuki"] = false;
+            $kyureki['is_chuki'] = false;
         }
-        $kyureki["chuki"] = $kyureki["chuki"][0];
+        $kyureki['chuki'] = $kyureki['chuki'][0];
         return $kyureki;
     }
     /* ----------------------------------------- */
@@ -378,7 +424,7 @@ class LunarCalendar
      * @params  $tm
      * @return integer
      */
-    private function getTuitachi($tm)
+    private function getTsuitachi($tm)
     {
         // ループカウンタのセット
         $lc=1;
@@ -639,24 +685,10 @@ class LunarCalendar
         return($th);
     }
 
-    private function makeJD($hour, $minute, $second, $month, $day, $year)
-        {
-        if ($month < 3.0) {
-            $year -= 1.0;
-            $month += 12.0;
-        }
-        $jd  = $this->flce(365.25 * $year);
-        $jd += $this->flce($year / 400.0);
-        $jd -= $this->flce($year / 100.0);
-        $jd += $this->flce(30.59 * ($month-2.0));
-        $jd += 1721088;
-        $jd += $day;
-        $t   = $second / 3600.0;
-        $t  += $minute /60.0;
-        $t  += $hour;
-        $t   = $t / 24.0;
-        $jd += $t;
-        return($jd);
+    private function makeJD($month, $day, $year)
+    {
+        $res =  gregoriantojd((int)$month, (int)$day, (int)$year);
+        return $res;
     }
 
     private function JD2DateArray($JD)

@@ -20,7 +20,7 @@
  * @doc_ignore
  */
 
-require __DIR__.'/../../libs/JapaneseDate.php';
+require __DIR__.'/../../libs/JapaneseDateTime.php';
 
 /**
  * テストのベースクラス

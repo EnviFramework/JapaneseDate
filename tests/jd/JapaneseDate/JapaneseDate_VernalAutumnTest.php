@@ -57,15 +57,12 @@ class JapaneseDate_VernalAutumnTest extends testCaseBase
      *
      * @access      public
      * @return      void
-     * @cover         JapaneseDate::__construct
-     * @cover         JapaneseDate::getVernalEquinoxDay
-     * @cover         JapaneseDate::withoutLuna
-     * @cover         JapaneseDate::withLuna
+     * @covers         JapaneseDate\JapaneseDate::__construct
+     * @covers         JapaneseDate\JapaneseDate::getVernalEquinoxDay
      */
     public function getVernalEquinoxDayTest()
     {
-        $jd = new JapaneseDate;
-        $jd->withOutLuna();
+        $jd = new \JapaneseDate\JapaneseDate;
         $res = $jd->getVernalEquinoxDay(2151);$this->assertFalse    ($res);
 
         $res = $jd->getVernalEquinoxDay(1923);$this->assertEquals(date('d', $res), '22');
@@ -189,15 +186,12 @@ class JapaneseDate_VernalAutumnTest extends testCaseBase
      *
      * @access      public
      * @return      void
-     * @cover         JapaneseDate::__construct
-     * @cover         JapaneseDate::getVernalEquinoxDay
-     * @cover         JapaneseDate::withoutLuna
-     * @cover         JapaneseDate::withLuna
+     * @covers         JapaneseDate\JapaneseDate::__construct
+     * @covers         JapaneseDate\JapaneseDate::getAutumnEquinoxDay
      */
     public function getAutumnEquinoxDayTest()
     {
-        $jd = new JapaneseDate;
-        $jd->withOutLuna();
+        $jd = new \JapaneseDate\JapaneseDate;
         $res = $jd->getAutumnEquinoxDay(2151);$this->assertFalse    ($res);
 
         $res = $jd->getAutumnEquinoxDay(1923);$this->assertEquals(date('d', $res), '24');

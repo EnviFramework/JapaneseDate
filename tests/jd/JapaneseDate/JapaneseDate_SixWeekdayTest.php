@@ -56,36 +56,42 @@ class JapaneseDate_SixWeekdayTest extends testCaseBase
      * +--
      *
      * @access      public
-     * @cover       JapaneseDate::getSixWeekday
-     * @cover       JapaneseDate::viewSixWeekday
      * @return      void
      */
     public function getSixWeekdayUnixBaseTimeTest()
     {
-        $jd = new JapaneseDate;
-        $jd->withOutLuna();
-        $six_week = $jd->getSixWeekday(-32400);
-        $this->assertEquals($jd->viewSixWeekday($six_week), '仏滅');
+        $jd = new JapaneseDateTime;
 
-        $six_week = $jd->getSixWeekday('1970-01-01 00:00:00');
-        $this->assertEquals($jd->viewSixWeekday($six_week), '仏滅');
-
-        $six_week = $jd->getSixWeekday('1970-01-01 23:59:59');
+        $jd->setTimestamp(strtotime('1970-01-01 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '仏滅');
 
 
+        $jd->setTimestamp(strtotime('1970-01-01 23:59:59'));
+        $six_week = $jd->getSixWeekday();
+        $this->assertEquals($jd->viewSixWeekday($six_week), '仏滅');
 
-        $six_week = $jd->getSixWeekday('1970-01-02 00:00:00');
+
+        $jd->setTimestamp(-32400);
+        $six_week = $jd->getSixWeekday();
+        $this->assertEquals($jd->viewSixWeekday($six_week), '仏滅');
+
+
+        $jd->setTimestamp(strtotime('1970-01-02 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '大安');
 
-        $six_week = $jd->getSixWeekday('1970-01-02 23:59:59');
+        $jd->setTimestamp(strtotime('1970-01-02 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '大安');
 
 
 
-        $six_week = $jd->getSixWeekday('1970-12-31 00:00:00');
+        $jd->setTimestamp(strtotime('1970-12-31 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先負');
-        $six_week = $jd->getSixWeekday('1970-12-31 23:59:59');
+        $jd->setTimestamp(strtotime('1970-12-31 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先負');
 
     }
@@ -95,40 +101,47 @@ class JapaneseDate_SixWeekdayTest extends testCaseBase
      * +--
      *
      * @access      public
-     * @cover       JapaneseDate::getSixWeekday
-     * @cover       JapaneseDate::viewSixWeekday
      * @return      void
      */
     public function getSixWeekdayNegativeTimeTest()
     {
-        $jd = new JapaneseDate;
-        $jd->withOutLuna();
+        $jd = new JapaneseDateTime;
 
-        $six_week = $jd->getSixWeekday('1969-12-31 00:00:00');
+        $jd->setTimestamp(strtotime('1969-12-31 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先負');
-        $six_week = $jd->getSixWeekday('1969-12-31 23:59:59');
+        $jd->setTimestamp(strtotime('1969-12-31 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先負');
 
 
-        $six_week = $jd->getSixWeekday('1969-12-30 00:00:00');
+        $jd->setTimestamp(strtotime('1969-12-30 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '友引');
-        $six_week = $jd->getSixWeekday('1969-12-30 23:59:59');
+        $jd->setTimestamp(strtotime('1969-12-30 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '友引');
 
 
-        $six_week = $jd->getSixWeekday('1969-12-29 00:00:00');
+        $jd->setTimestamp(strtotime('1969-12-29 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先勝');
-        $six_week = $jd->getSixWeekday('1969-12-29 23:59:59');
+        $jd->setTimestamp(strtotime('1969-12-29 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '先勝');
 
-        $six_week = $jd->getSixWeekday('1969-12-28 00:00:00');
+        $jd->setTimestamp(strtotime('1969-12-28 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '赤口');
-        $six_week = $jd->getSixWeekday('1969-12-28 23:59:59');
+        $jd->setTimestamp(strtotime('1969-12-28 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '赤口');
 
-        $six_week = $jd->getSixWeekday('1969-12-27 00:00:00');
+        $jd->setTimestamp(strtotime('1969-12-27 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '大安');
-        $six_week = $jd->getSixWeekday('1969-12-27 23:59:59');
+        $jd->setTimestamp(strtotime('1969-12-27 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '大安');
     }
     /* ----------------------------------------- */
@@ -138,18 +151,17 @@ class JapaneseDate_SixWeekdayTest extends testCaseBase
      * +--
      *
      * @access      public
-     * @cover       JapaneseDate::getSixWeekday
-     * @cover       JapaneseDate::viewSixWeekday
      * @return      void
      */
     public function getSixWeekdayCherryPickTimeTest()
     {
-        $jd = new JapaneseDate;
-        $jd->withOutLuna();
+        $jd = new JapaneseDateTime;
 
-        $six_week = $jd->getSixWeekday('2016-01-01 00:00:00');
+        $jd->setTimestamp(strtotime('2016-01-01 00:00:00'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '友引');
-        $six_week = $jd->getSixWeekday('2016-01-01 23:59:59');
+        $jd->setTimestamp(strtotime('2016-01-01 23:59:59'));
+        $six_week = $jd->getSixWeekday();
         $this->assertEquals($jd->viewSixWeekday($six_week), '友引');
 
 

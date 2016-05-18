@@ -68,3 +68,4 @@ Sample.phpと、ARTISAN PROJECTで公開されているドキュメント
 
  * 2016年05月13日  Version 2.1
     * Git Hub化しました
+

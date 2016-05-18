@@ -1,18 +1,20 @@
 <?php
-// +----------------------------------------------------------------------+
-// |                          Japanese Date                               |
-// +----------------------------------------------------------------------+
-// | PHP Version 4・5                                                     |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 2002-2006 The Artisan Member                           |
-// +----------------------------------------------------------------------+
-// | Authors: Akito<akito-artisan@five-foxes.com>                         |
-// +----------------------------------------------------------------------+
-//
+/**
+ * @package    %%project_name%%
+ * @subpackage %%subpackage_name%%
+ * @author     Suzunone <suzunone.eleven@gmail.com>
+ * @copyright  %%your_project%%
+ * @license    %%your_license%%
+ * @link       %%your_link%%
+ * @see        %%your_see%%
+ * @sinse Class available since Release 1.0.0
+ */
+$start_microtime = microtime(true);
+
+
 //サンプルコード
-require_once("libs/JapaneseDate.php");
-// オブジェクトの作成
-$jd = new JapaneseDate();
+require_once(__DIR__."/libs/JapaneseDateTime.php");
+
 
 ?>
 <html>
@@ -73,7 +75,7 @@ if (isset($_GET["y"]) ? (strlen($_GET["y"]) == 4 && is_numeric($_GET["y"]) ? (in
 ////////////////////////////mb_strftimeのサンプル////////////////////////////<br />
 <br />
 <?php
-echo $jd->mb_strftime("
+echo JapaneseDateTime::factory(mktime(0,0,0,5,3,2005))->strftime("
 %%%Y-%m-%d%%<table>
 <tr><td>西暦</td><td>%Y</td></tr>
 <tr><td>月1</td><td>%m</td></tr>
@@ -94,12 +96,12 @@ echo $jd->mb_strftime("
 <tr><td>年号</td><td>%F</td></tr>
 <tr><td>和暦</td><td>%E</td></tr>
 </table>
-", mktime(0,0,0,5,3,2005));
+");
 
 ?>
 <br />
 <?php
-echo $jd->mb_strftime("
+echo JapaneseDateTime::factory()->strftime("
 %%%Y-%m-%d%%<table>
 <tr><td>西暦</td><td>%Y</td></tr>
 <tr><td>月1</td><td>%m</td></tr>
@@ -130,23 +132,16 @@ echo $jd->mb_strftime("
 <?php
 $month_array = range(1, 12);
 foreach ($month_array as $month) {
-?>
-<?php echo $year; ?>年
-(
-<?php echo $jd->viewEraName($jd->getEraName(mktime(0, 0, 0, 1,$month, $year))).$jd->getEraYear(mktime(0, 0, 0, 1,$month, $year)); ?>年
-/<?php echo $jd->viewOrientalZodiac($jd->getOrientalZodiac(mktime(0, 0, 0, 1,$month, $year))); ?>
-)<br />
-<?php
-echo $month;
-?>
-月(<?php echo $jd->viewMonth($month);?>)
+    $jd = new JapaneseDateTime("{$year}-{$month}-01");
 
+?>
+<?=$jd->format('Y'); ?>年
+(<?=$jd->viewEraName().$jd->getEraYear(); ?>年/<?=$jd->viewOrientalZodiac(); ?>)<br />
+<?=$jd->format('m'); ?>月(<?php echo $jd->viewMonth();?>)
 <?php
 $noday = "-";
-$_from = $jd->getCalendar($year, $month);
-if (!is_array($_from) && !is_object($_from)) {
-	settype($_from, 'array');
-}
+$_from = $jd->getCalendar();
+
 $_foreach['calendar'] = array('total' => count($_from), 'iteration' => 0);
 
 if ($_foreach['calendar']['total'] > 0):
@@ -180,73 +175,73 @@ if ($_foreach['calendar']['total'] > 0):
 </th>
 </tr>
 <?php endif; ?>
-<?php if ($value['week'] == 0): ?>
+<?php if ($value->getWeekDay() == 0): ?>
 <tr class="calendarday">
-<td class="<?php if ($value['holiday'] == 0): ?>sunday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value['day']; ?><br />
-<?php echo $jd->viewSixWeekday($value["sixweek"]);?><br />
-<small><?php echo $value['luna_year']; ?>/
-<?php if ($value["uruu"]) : ?>
+<td class="<?php if ($value->getHoliday() == 0): ?>sunday<?php else: ?>holiday<?php endif; ?>">
+<?php echo $value->getDay(); ?><br />
+<?php echo $value->viewSixWeekday();?><br />
+<small><?php echo $value->getLunarYear(); ?>/
+<?php if ($value->isUruu()) : ?>
 (閏)
 <?php endif; ?>
-<?php echo $jd->viewMonth($value['luna_month']); ?>
-<?php echo $value['luna_day']; ?><br /></small><?php if ($value["holiday"] != 0) : ?>
-<?php echo $jd->viewHoliday($value["holiday"]); ?>
+<?php echo $value->viewLunarMonth(); ?>
+<?php echo $value->getLunarDay(); ?><br /></small><?php if ($value->getHoliday() != 0) : ?>
+<?php echo $value->viewHoliday(); ?>
 <?php endif; ?>
 </td>
-<?php elseif ($value['week'] > 0 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php elseif ($value->getWeekDay() > 0 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <tr class="calendarday">
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] > 1 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->getWeekDay() > 1 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] > 2 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->getWeekDay() > 2 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] > 3 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->getWeekDay() > 3 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] > 4 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->getWeekDay() > 4 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] > 5 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->getWeekDay() > 5 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] == 6): ?>
-<td class="<?php if ($value['holiday'] == 0): ?>saturday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value['day']; ?><br />
-<?php echo $jd->viewSixWeekday($value["sixweek"]);?><br />
-<small><?php echo $value['luna_year']; ?>/
-<?php if ($value["uruu"]) : ?>
+<?php endif;  if ($value->getWeekDay() == 6): ?>
+<td class="<?php if ($value->getHoliday() == 0): ?>saturday<?php else: ?>holiday<?php endif; ?>">
+<?php echo $value->getDay(); ?><br />
+<?php echo $value->viewSixWeekday();?><br />
+<small><?php echo $value->getLunarYear(); ?>/
+<?php if ($value->isUruu()) : ?>
 (閏)
 <?php endif; ?>
-<?php echo $jd->viewMonth($value['luna_month']); ?>
-<?php echo $value['luna_day']; ?><br /></small>
-<?php if ($value["holiday"] != 0) : ?>
-<?php echo $jd->viewHoliday($value["holiday"]); ?>
+<?php echo $value->viewLunarMonth(); ?>
+<?php echo $value->getLunarDay(); ?><br /></small>
+<?php if ($value->getHoliday() != 0) : ?>
+<?php echo $value->viewHoliday(); ?>
 <?php endif; ?>
 </td>
 </tr>
 
-<?php elseif ($value['week'] > 0): ?>
-<td class="<?php if ($value['holiday'] == 0): ?>weekday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value['day']; ?><br />
-<?php echo $jd->viewSixWeekday($value["sixweek"]);?><br />
-<small><?php echo $value['luna_year']; ?>/
-<?php if ($value["uruu"]) : ?>
+<?php elseif ($value->getWeekDay() > 0): ?>
+<td class="<?php if ($value->getHoliday() == 0): ?>weekday<?php else: ?>holiday<?php endif; ?>">
+<?php echo $value->getDay(); ?><br />
+<?php echo $value->viewSixWeekday();?><br />
+<small><?php echo $value->getLunarYear(); ?>/
+<?php if ($value->isUruu()) : ?>
 (閏)
 <?php endif; ?>
-<?php echo $jd->viewMonth($value['luna_month']); ?>
-<?php echo $value['luna_day']; ?><br /></small><?php if ($value["holiday"] != 0) : ?>
-<?php echo $jd->viewHoliday($value["holiday"]); ?>
+<?php echo $value->viewLunarMonth(); ?>
+<?php echo $value->getLunarDay(); ?><br /></small><?php if ($value->getHoliday() != 0) : ?>
+<?php echo $value->viewHoliday(); ?>
 <?php endif; ?>
 </td>
-<?php endif;  if (($_foreach['calendar']['iteration'] == $_foreach['calendar']['total'])):  if ($value['week'] < 1): ?>
+<?php endif;  if (($_foreach['calendar']['iteration'] == $_foreach['calendar']['total'])):  if ($value->getWeekDay() < 1): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] < 2): ?>
+<?php endif;  if ($value->getWeekDay() < 2): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] < 3): ?>
+<?php endif;  if ($value->getWeekDay() < 3): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] < 4): ?>
+<?php endif;  if ($value->getWeekDay() < 4): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] < 5): ?>
+<?php endif;  if ($value->getWeekDay() < 5): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value['week'] < 6): ?>
+<?php endif;  if ($value->getWeekDay() < 6): ?>
 <td class="weekday"><?php echo $noday;?></td>
 <?php endif; ?>
 </table>
@@ -254,6 +249,7 @@ if ($_foreach['calendar']['total'] > 0):
 <hr>
 <?php
 }
+echo 'total:'.(microtime(true) - $start_microtime);
 ?>
 
 </body>
