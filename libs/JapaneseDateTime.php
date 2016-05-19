@@ -403,8 +403,8 @@ class JapaneseDateTime extends DateTime
     {
         $time_stamp = $this->getTimestamp();
         if (!isset($this->lunar_calendar[$time_stamp])) {
-            $this->lunar_calendar[$time_stamp] = $this->LC->getLunarCalendarByMktime(
-                0, 0, 0, $this->getMonth(), $this->getDay(), $this->getYear()
+            $this->lunar_calendar[$time_stamp] = $this->LC->getLunarCalendarByMDY(
+                $this->getMonth(), $this->getDay(), $this->getYear()
             );
         }
         return $this->lunar_calendar[$time_stamp];

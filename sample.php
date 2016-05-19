@@ -13,7 +13,7 @@ $start_microtime = microtime(true);
 
 
 //サンプルコード
-require_once(__DIR__."/libs/JapaneseDateTime.php");
+require __DIR__."/libs/JapaneseDateTime.php";
 
 
 ?>
