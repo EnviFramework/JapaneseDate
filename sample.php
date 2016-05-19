@@ -72,7 +72,7 @@ if (isset($_GET["y"]) ? (strlen($_GET["y"]) == 4 && is_numeric($_GET["y"]) ? (in
 <input type="text" name="y" value="<?php echo $year; ?>">年
 <input type="submit" value="表示">
 </form>
-////////////////////////////mb_strftimeのサンプル////////////////////////////<br />
+////////////////////////////strftimeのサンプル////////////////////////////<br />
 <br />
 <?php
 echo JapaneseDateTime::factory(mktime(0,0,0,5,3,2005))->strftime("
