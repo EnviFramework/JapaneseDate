@@ -110,6 +110,63 @@ class LunarCalendarTest extends testCaseBase
     }
     /* ----------------------------------------- */
 
+    /**
+     * +-- JD2DateArrayTest
+     *
+     * @access      public
+     * @return      void
+     * @dataProvider createTestObject
+     */
+    public function JD2DateArrayTest($LunarCalendar, $JapaneseDateTime)
+    {
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 28, 2000);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2000, $res[0]);
+        $this->assertEquals(2, $res[1]);
+        $this->assertEquals(28, $res[2]);
+
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 29, 2000);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2000, $res[0]);
+        $this->assertEquals(2, $res[1]);
+        $this->assertEquals(29, $res[2]);
+
+
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 28, 2016);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2016, $res[0]);
+        $this->assertEquals(2, $res[1]);
+        $this->assertEquals(28, $res[2]);
+
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 29, 2016);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2016, $res[0]);
+        $this->assertEquals(2, $res[1]);
+        $this->assertEquals(29, $res[2]);
+
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 28, 2037);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2037, $res[0]);
+        $this->assertEquals(2, $res[1]);
+        $this->assertEquals(28, $res[2]);
+
+        $tm = $LunarCalendar->makeJD(9, 0, 0, 2, 29, 2037);
+        $res = $this->call($LunarCalendar, 'JD2DateArray', array($tm));
+        $this->assertEquals(2037, $res[0]);
+        $this->assertEquals(3, $res[1]);
+        $this->assertEquals(1, $res[2]);
+
+
+    }
+    /* ----------------------------------------- */
+
 
     /**
      * +-- 終了処理

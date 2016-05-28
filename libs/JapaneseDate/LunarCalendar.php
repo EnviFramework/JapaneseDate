@@ -95,14 +95,14 @@ class LunarCalendar
             $date[3],
             $date[4],
             $date[5]
-  );
+ );
         /*
         $date = explode('-', date('m-d-Y', $time_stamp));
         return gregoriantojd(
             $date[0],
             $date[1],
             $date[2]
-  );
+ );
    */
     }
     /* ----------------------------------------- */
@@ -159,21 +159,17 @@ class LunarCalendar
 
         // 計算対象の直前にあたる二分二至の直前の朔の時刻を求める
         $Tsuitachi[0] = $this->getTsuitachi($nibun[0][0]);
-        if ($nibun[0][1] % 30) {
-            list($chu[0][0], $chu[0][1]) = $this->getChu($nibun[0][0]);
-        } else {
-            $chu[0] = $nibun[0];
-        }
+        $chu[0]       = $nibun[0];
 
         // 中気の時刻を計算
-        for ($i = 1; $i <= $lim ; $i++) {
+        for ($i = 1; $i <= $lim; $i++) {
             list($chu[$i][0], $chu[$i][1]) = $this->getChu($chu[$i - 1][0] + 32.0);
         }
 
         // 朔の時刻を求める
         for ($i = 1; $i <= $lim; $i++) {
             $tm = $Tsuitachi[$i - 1];
-            $tm += 30.0;
+            $tm  +=  30.0;
             $Tsuitachi[$i] = $this->getTsuitachi($tm);
             // 前と同じ時刻を計算した場合（両者の差が26日以内）には、初期値を
             // +35日にして再実行させる。
@@ -190,7 +186,7 @@ class LunarCalendar
             $Tsuitachi[4] = $this->getTsuitachi($Tsuitachi[3] + 35.0);
          } elseif ((int)($Tsuitachi[0]) > (int)($nibun[0][0])) {
             // 二分二至の時刻以後になってしまった場合、朔の時刻を繰り上げて修正する。
-             for ($i = 4 ; $i > 0; $i--) {
+             for ($i = 4; $i > 0; $i--) {
                 $Tsuitachi[$i] = $Tsuitachi[$i - 1];
             }
             $Tsuitachi[0] = $this->getTsuitachi($Tsuitachi[0] - 27.0);
@@ -204,7 +200,7 @@ class LunarCalendar
             if ($key == 0) {
                 $res[$key]['month'] = (int)($chu[0][1] / 30.0) + 2;
                 if ($res[$key]['month'] > 12) {
-                    $res[$key]['month']-=12;
+                    $res[$key]['month'] -= 12;
                 }
                 $res[$key]['uruu']  = false;
                 $res[$key]['chuki'] = $chu[$key];
@@ -222,7 +218,7 @@ class LunarCalendar
             (int)($chu[$a][0]) >= (int)($value)) {
                 $res[$key]['month'] = $res[$key -1]['month'] + 1;
                 if ($res[$key]['month'] > 12) {
-                    $res[$key]['month']-=12;
+                    $res[$key]['month'] -= 12;
                 }
                 $res[$key]['uruu']  = false;
                 $res[$key]['chuki'] = $chu[$key + 1 - $uruu_count];
@@ -310,7 +306,7 @@ class LunarCalendar
         $tm1 = $jd;
         $tm2 = $jd - $tm1;
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
-        $tm2-=$this->tdt;
+        $tm2 -= $this->tdt;
         $t = ($tm2 + 0.5) / 36525.0;
         $t = $t + ($tm1-2451545.0) / 36525.0;
         $rm_sun = $this->celestialLongitudeOfTheSun($t);
@@ -337,7 +333,7 @@ class LunarCalendar
         // 中気かどうか
         $kyureki['is_chuki'] = false;
         foreach ($m as $key => $item) {
-            if (!(isset($item['chuki'][0]) && $item['chuki'][0])){
+            if (!(isset($item['chuki'][0]) && $item['chuki'][0])) {
                 continue;
             }
             $ck = $this->toIntJD($item['chuki'][0]);
@@ -378,49 +374,52 @@ class LunarCalendar
     protected function calcChu($tm)
     {
         // 時刻引数を分解する
-        $tm1 = (int)($tm );
+        $tm1 = (int)($tm);
         $tm2 = $tm - $tm1;
 
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
-        $tm2-=9.0/24.0;
+        $tm2 -= 9.0/24.0;
 
         // 中気の黄経 λsun0 を求める
         $t=($tm2+0.5) / 36525.0;
         $t=$t + ($tm1-2451545.0) / 36525.0;
-        $rm_sun = $this->celestialLongitudeOfTheSun($t );
+        $rm_sun = $this->celestialLongitudeOfTheSun($t);
         $rm_sun0 = 30.0*(int)($rm_sun/30.0);
 
         // 繰り返し計算によって中気の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
-        for ($delta_t2 = 1.0 ; abs($delta_t1 + $delta_t2 ) > (1.0 / 86400.0 ) ;) {
+        for ($delta_t2 = 1.0; abs($delta_t1 + $delta_t2) > (1.0 / 86400.0);) {
             // λsun を計算
             $t =($tm2+0.5) / 36525.0;
             $t =$t + ($tm1-2451545.0) / 36525.0;
-            $rm_sun=$this->celestialLongitudeOfTheSun($t );
+            $rm_sun=$this->celestialLongitudeOfTheSun($t);
 
             // 黄経差 Δλ＝λsun －λsun0
-            $delta_rm = $rm_sun - $rm_sun0 ;
+            $delta_rm = $rm_sun - $rm_sun0;
 
             // Δλの引き込み範囲（±180°）を逸脱した場合には、補正を行う
-            if ($delta_rm > 180.0 ){
-                $delta_rm-=360.0;
-            } elseif ($delta_rm < -180.0 ){
-                $delta_rm+=360.0;
+            if ($delta_rm > 180.0) {
+                $delta_rm -= 360.0;
+            // @codeCoverageIgnoreStart
+            } elseif ($delta_rm < -180.0) {
+                // 本来であれば通過しないはず
+                $delta_rm += 360.0;
             }
+            // @codeCoverageIgnoreEnd
 
             // 時刻引数の補正値 Δt
             // delta_t = delta_rm * 365.2 / 360.0;
             $delta_t1 = (int)($delta_rm * 365.2 / 360.0);
             $delta_t2 = $delta_rm * 365.2 / 360.0;
-            $delta_t2 -= $delta_t1;
+            $delta_t2  -=  $delta_t1;
 
             // 時刻引数の補正
-            // tm -= delta_t;
+            // tm  -=  delta_t;
             $tm1 = $tm1 - $delta_t1;
             $tm2 = $tm2 - $delta_t2;
-            if ($tm2 < 0){
-                $tm2+=1.0;$tm1-=1.0;
+            if ($tm2 < 0) {
+                $tm2 += 1.0;$tm1 -= 1.0;
             }
         }
 
@@ -429,7 +428,7 @@ class LunarCalendar
         // （補正時刻=0.0sec と仮定して計算）
         // chu[i,1]:黄経
         $temp[0] = $tm2+9.0/24.0;
-        $temp[0] += $tm1;
+        $temp[0]  +=  $tm1;
         $temp[1] = $rm_sun0;
         return array($temp[0],$temp[1]);
     }
@@ -439,49 +438,52 @@ class LunarCalendar
     {
 
         // 時刻引数を分解する
-        $tm1 = (int)($tm );
+        $tm1 = (int)($tm);
         $tm2 = $tm - $tm1;
 
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
-        $tm2-=9.0/24.0;
+        $tm2 -= 9.0/24.0;
 
         // 直前の二分二至の黄経 λsun0 を求める
         $t=($tm2+0.5) / 36525.0;
         $t=$t + ($tm1-2451545.0) / 36525.0;
-        $rm_sun=$this->celestialLongitudeOfTheSun($t );
+        $rm_sun=$this->celestialLongitudeOfTheSun($t);
         $rm_sun0=90*(int)($rm_sun/90.0);
 
         // 繰り返し計算によって直前の二分二至の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
-        for($delta_t2 = 1.0 ; abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 ) ; ){
+        for($delta_t2 = 1.0; abs($delta_t1+$delta_t2) > (1.0 / 86400.0);) {
             // λsun を計算
             $t = ($tm2+0.5) / 36525.0;
             $t = $t + ($tm1-2451545.0) / 36525.0;
-            $rm_sun = $this->celestialLongitudeOfTheSun($t );
+            $rm_sun = $this->celestialLongitudeOfTheSun($t);
 
             // 黄経差 Δλ＝λsun －λsun0
-            $delta_rm = $rm_sun - $rm_sun0 ;
+            $delta_rm = $rm_sun - $rm_sun0;
 
             // Δλの引き込み範囲（±180°）を逸脱した場合には、補正を行う
             if ($delta_rm > 180.0) {
-                $delta_rm-=360.0;
+                $delta_rm -= 360.0;
+            // @codeCoverageIgnoreStart
             } elseif ($delta_rm < -180.0) {
-                $delta_rm+=360.0;
+                // 本来であれば通過しないはず
+                $delta_rm += 360.0;
             }
+            // @codeCoverageIgnoreEnd
 
             // 時刻引数の補正値 Δt
             // delta_t = delta_rm * 365.2 / 360.0;
             $delta_t1 = (int)($delta_rm * 365.2 / 360.0);
             $delta_t2 = $delta_rm * 365.2 / 360.0;
-            $delta_t2 -= $delta_t1;
+            $delta_t2  -=  $delta_t1;
 
             // 時刻引数の補正
-            // tm -= delta_t;
+            // tm  -=  delta_t;
             $tm1 = $tm1 - $delta_t1;
             $tm2 = $tm2 - $delta_t2;
-            if ($tm2 < 0){
-                $tm2+=1.0;$tm1-=1.0;
+            if ($tm2 < 0) {
+                $tm2 += 1.0;$tm1 -= 1.0;
             }
         }
 
@@ -490,7 +492,7 @@ class LunarCalendar
         // （補正時刻=0.0sec と仮定して計算）
         // nibun[0,1]:黄経
         $nibun[0] = $tm2+9.0/24.0;
-        $nibun[0] += $tm1;
+        $nibun[0]  +=  $tm1;
         $nibun[1] = $rm_sun0;
 
         return array($nibun[0],$nibun[1]);
@@ -512,60 +514,60 @@ class LunarCalendar
         $lc = 1;
 
         // 時刻引数を分解する
-        $tm1 = (int)($tm );
+        $tm1 = (int)($tm);
         $tm2 = $tm - $tm1;
 
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
-        $tm2 -= $this->tdt;
+        $tm2  -=  $this->tdt;
 
         // 繰り返し計算によって朔の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
-        for ($delta_t2 = 1.0 ; abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 ) ; $lc++) {
+        for ($delta_t2 = 1.0; abs($delta_t1+$delta_t2) > (1.0 / 86400.0); $lc++) {
             // 太陽の黄経λsun ,月の黄経λmoon を計算
             // t = (tm - 2451548.0 + 0.5)/36525.0;
             $t=($tm2+0.5) / 36525.0;
             $t=$t + ($tm1-2451545.0) / 36525.0;
-            $rm_sun=$this->celestialLongitudeOfTheSun($t );
-            $rm_moon=$this->celestialLongitudeOfTheMoon($t );
+            $rm_sun=$this->celestialLongitudeOfTheSun($t);
+            $rm_moon=$this->celestialLongitudeOfTheMoon($t);
 
             // 月と太陽の黄経差Δλ
             // Δλ＝λmoon－λsun
-            $delta_rm = $rm_moon - $rm_sun ;
+            $delta_rm = $rm_moon - $rm_sun;
 
             // ループの１回目（lc=1）で delta_rm < 0.0 の場合には引き込み範囲に
             // 入るように補正する
-            if ($lc === 1 && $delta_rm < 0.0 ){
-                $delta_rm = $this->angleNormalize($delta_rm );
-            } elseif ($rm_sun >= 0 && $rm_sun <= 20 && $rm_moon >= 300 ){
+            if ($lc === 1 && $delta_rm < 0.0) {
+                $delta_rm = $this->angleNormalize($delta_rm);
+            } elseif ($rm_sun >= 0 && $rm_sun <= 20 && $rm_moon >= 300) {
                 // 春分の近くで朔がある場合（0 ≦λsun≦ 20）で、月の黄経λmoon≧300 の
                 // 場合には、Δλ＝ 360.0 － Δλ と計算して補正する
-                $delta_rm = $this->angleNormalize($delta_rm );
+                $delta_rm = $this->angleNormalize($delta_rm);
                 $delta_rm = 360.0 - $delta_rm;
-            } elseif (abs($delta_rm ) > 40.0) {
+            } elseif (abs($delta_rm) > 40.0) {
                 // Δλの引き込み範囲（±40°）を逸脱した場合には、補正を行う
-                $delta_rm = $this->angleNormalize($delta_rm );
+                $delta_rm = $this->angleNormalize($delta_rm);
             }
 
             // 時刻引数の補正値 Δt
             // delta_t = delta_rm * 29.530589 / 360.0;
             $delta_t1 = (int)($delta_rm * 29.530589 / 360.0);
             $delta_t2 = $delta_rm * 29.530589 / 360.0;
-            $delta_t2 -= $delta_t1;
+            $delta_t2  -=  $delta_t1;
 
             // 時刻引数の補正
-            // tm -= delta_t;
+            // tm  -=  delta_t;
             $tm1 = $tm1 - $delta_t1;
             $tm2 = $tm2 - $delta_t2;
-            if ($tm2 < 0.0){
-                $tm2+=1.0;$tm1-=1.0;
+            if ($tm2 < 0.0) {
+                $tm2 += 1.0;$tm1 -= 1.0;
             }
 
             // ループ回数が15回になったら、初期値 tm を tm-26 とする。
-            if ($lc == 15 && abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 )) {
-                $tm1 = (int)($tm-26 );
+            if ($lc == 15 && abs($delta_t1+$delta_t2) > (1.0 / 86400.0)) {
+                $tm1 = (int)($tm-26);
                 $tm2 = 0;
-            } elseif ($lc > 30 && abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 )) {
+            } elseif ($lc > 30 && abs($delta_t1+$delta_t2) > (1.0 / 86400.0)) {
                 // 初期値を補正したにも関わらず、振動を続ける場合には初期値を答えとして
                 // 返して強制的にループを抜け出して異常終了させる。
                 $tm1=$tm;$tm2=0;
@@ -591,7 +593,7 @@ class LunarCalendar
     {
         if ($angle < 0) {
             $angle1 = -$angle;
-            $angle1 -= 360 * (int)($angle1 / 360);
+            $angle1  -=  360 * (int)($angle1 / 360);
             $angle1 = 360 - $angle1;
         } else {
             $angle1 = $angle - 360 * (int)($angle / 360);
@@ -642,8 +644,8 @@ class LunarCalendar
         $ang = $this->angleNormalize(71998.1 * $t + 265.1);
         $th = $th + .0200 * cos($k*$ang);
         $ang = $this->angleNormalize(35999.05 * $t + 267.52);
-        $th = $th - 0.0048 * $t * cos($k*$ang) ;
-        $th = $th + 1.9147 * cos($k*$ang) ;
+        $th = $th - 0.0048 * $t * cos($k*$ang);
+        $th = $th + 1.9147 * cos($k*$ang);
         // 比例項の計算
         $ang = $this->angleNormalize(36000.7695 * $t);
         $ang = $this->angleNormalize($ang + 280.4659);
@@ -810,20 +812,22 @@ class LunarCalendar
     public function makeJD($hour, $minute, $second, $month, $day, $year)
     {
         if ($month < 3.0) {
-            $year -= 1.0;
-            $month += 12.0;
+            $year   -=  1.0;
+            $month  +=  12.0;
         }
-        $jd  = (int)(365.25 * $year);
-        $jd += (int)($year / 400.0);
-        $jd -= (int)($year / 100.0);
-        $jd += (int)(30.59 * ($month-2.0));
-        $jd += 1721088;
-        $jd += $day;
-        $t  = $second / 3600.0;
-        $t += $minute /60.0;
-        $t += $hour;
-        $t  = $t / 24.0;
-        $jd += $t;
+        $jd  =   (int)(365.25 * $year);
+        $jd  +=  (int)($year / 400.0);
+        $jd  -=  (int)($year / 100.0);
+        $jd  +=  (int)(30.59 * ($month-2.0));
+        $jd  +=  1721088;
+        $jd  +=  $day;
+
+        $t  =   $second / 3600.0;
+        $t  +=  $minute /60.0;
+        $t  +=  $hour;
+        $t  =   $t / 24.0;
+
+        $jd  +=  $t;
         return ($jd);
     }
     /* ----------------------------------------- */
@@ -841,27 +845,42 @@ class LunarCalendar
         $res[1] = $x5 - 12*$x6 + 2;
         $res[0] = 100 * ($x1 - 49) + $x3 + $x6;
         // 2月30日の補正
-        if ($res[1] === 2 && $res[2] > 28){
+        if ($res[1] === 2 && $res[2] > 28) {
             if ($res[0] % 100 == 0 && $res[0] % 400 == 0) {
-                $res[2]=29;
+                $res[2] = 29;
             } elseif ($res[0] % 4 == 0) {
-                $res[2]=29;
+                $res[2] = 29;
             } else {
-                $res[2]=28;
+                $res[2] = 28;
             }
         }
+
         $tm     = 86400.0*($JD - (int)($JD));
         $res[3] = (int)($tm/3600.0);
         $res[4] = (int)(($tm - 3600.0*$res[3]) / 60.0);
         $res[5] = (int)($tm - 3600.0*$res[3] - 60*$res[4]);
-        return array($res[0], $res[1], $res[2], $res[3], $res[4], $res[5]);
+        return array($res[0], $res[1], (int)$res[2], $res[3], $res[4], $res[5]);
     }
 
     /**
      * +--
      *
      * @access      public
-     * @param       var_text $JD
+     * @param       float $JD
+     * @return      void
+     */
+    public function JD2Timestamp($JD)
+    {
+        $res = $this->JD2DateArray($JD);
+        return mktime($res[3], $res[4], $res[5], $res[1], $res[2], $res[0]);
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       float $JD
      * @return      int
      */
     public function toIntJD($JD)

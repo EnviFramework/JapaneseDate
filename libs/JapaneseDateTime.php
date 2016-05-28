@@ -556,18 +556,6 @@ class JapaneseDateTime extends DateTime
     }
     /* ----------------------------------------- */
 
-    /**
-     * +-- ユニックスタイムスタンプから、ユリウス暦を取得します。
-     *
-     * @see japaneseDate_lunarCalendar::time2JD()
-     * @return float
-     */
-    public function time2JD()
-    {
-        return $this->LC->time2JD($this->getTimestamp());
-    }
-    /* ----------------------------------------- */
-
 
     /**
      * +-- 日本語カレンダー対応したstrftime()

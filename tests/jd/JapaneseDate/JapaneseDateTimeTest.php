@@ -279,15 +279,6 @@ class JapaneseDateTimeTest extends testCaseBase
 
 
 
-
-
-    public function time2JDTest()
-    {
-        $JDT = new JapaneseDateTime('1868-01-25');
-        $this->assertEquals($JDT->toIntJD($JDT->time2JD()), gregoriantojd(1, 25, 1868));
-    }
-
-
     /**
      * +-- 終了処理
      *
