@@ -67,6 +67,78 @@ class JapaneseDateTest extends testCaseBase
     /* ----------------------------------------- */
 
     /**
+     * +--
+     *
+     * @access      public
+     * @return      void
+     * @covers JapaneseDate\JapaneseDate::getDayByWeekly
+     */
+    public function getDayByWeeklyTest()
+    {
+        $JapaneseDate = new \JapaneseDate\JapaneseDate();
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::SUNDAY, 1, $timezone = NULL);
+        $this->assertEquals(5, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::SUNDAY, 1, $timezone = NULL);
+        $this->assertEquals(1, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::SUNDAY, 2, $timezone = NULL);
+        $this->assertEquals(5+7, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::SUNDAY, 2, $timezone = NULL);
+        $this->assertEquals(1+7, $res);
+
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::MONDAY, 1, $timezone = NULL);
+        $this->assertEquals(6, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::MONDAY, 1, $timezone = NULL);
+        $this->assertEquals(2, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::MONDAY, 2, $timezone = NULL);
+        $this->assertEquals(6+7, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::MONDAY, 2, $timezone = NULL);
+        $this->assertEquals(2+7, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::TUESDAY, 1, $timezone = NULL);
+        $this->assertEquals(7, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::TUESDAY, 1, $timezone = NULL);
+        $this->assertEquals(3, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 6, JapaneseDateTime::TUESDAY, 2, $timezone = NULL);
+        $this->assertEquals(7+7, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::TUESDAY, 2, $timezone = NULL);
+        $this->assertEquals(3+7, $res);
+
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::WEDNESDAY, 1, $timezone = NULL);
+        $this->assertEquals(4, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::WEDNESDAY, 2, $timezone = NULL);
+        $this->assertEquals(4+7, $res);
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::THURSDAY, 1, $timezone = NULL);
+        $this->assertEquals(5, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::THURSDAY, 2, $timezone = NULL);
+        $this->assertEquals(5+7, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::FRIDAY, 1, $timezone = NULL);
+        $this->assertEquals(6, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::FRIDAY, 2, $timezone = NULL);
+        $this->assertEquals(6+7, $res);
+
+
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::SATURDAY, 1, $timezone = NULL);
+        $this->assertEquals(7, $res);
+        $res = $JapaneseDate->getDayByWeekly(2016, 5, JapaneseDateTime::SATURDAY, 2, $timezone = NULL);
+        $this->assertEquals(7+7, $res);
+    }
+    /* ----------------------------------------- */
+
+    /**
      * +-- 祝日法の開始
      *
      * @access      public

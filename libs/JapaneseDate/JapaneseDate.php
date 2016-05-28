@@ -46,8 +46,6 @@ class JapaneseDate
 
     private $_weekday_name = array('日', '月', '火', '水', '木', '金', '土');
 
-    private $_during_the_war_period_weekday_name = array('月', '月', '火', '水', '木', '金', '金');
-
     private $_month_name = array('', '睦月', '如月', '弥生', '卯月', '皐月', '水無月', '文月', '葉月', '長月', '神無月', '霜月', '師走');
 
     private $_six_weekday = array('大安', '赤口', '先勝', '友引', '先負', '仏滅');
@@ -219,19 +217,6 @@ class JapaneseDate
 
 
     /**
-     * +-- 日本語フォーマットされた戦争中曜日名を返す
-     *
-     * @access      public
-     * @param       int $key 曜日キー
-     * @return      string
-     */
-    public function viewWarWeekday($key)
-    {
-        return $this->during_the_war_period_weekday_name[$key];
-    }
-    /* ----------------------------------------- */
-
-    /**
      * +-- 日本語フォーマットされた干支を返す
      *
      * @access      public
@@ -302,29 +287,6 @@ class JapaneseDate
     /* ----------------------------------------- */
 
     /**
-     * +-- タイムスタンプを展開して、日付の詳細配列を取得する
-     *
-     * @access      public
-     * @param       int $time_stamp タイムスタンプ
-     * @return      int タイムスタンプ
-     */
-    public function makeDateArray($time_stamp)
-    {
-        $time_stamp     = $this->toTimeStamp($time_stamp);
-        $res = array(
-            'Year'    => $this->getYear($time_stamp),
-            'Month'   => $this->getMonth($time_stamp),
-            'Day'     => $this->getDay($time_stamp),
-            'Weekday' => $this->getWeekday($time_stamp),
-        );
-
-        $holiday_list = $this->getHolidayList($time_stamp);
-        $res['Holiday'] = isset($holiday_list[$res['Day']]) ? $holiday_list[$res['Day']] : JapaneseDateTime::NO_HOLIDAY;
-        return $res;
-    }
-    /* ----------------------------------------- */
-
-    /**
      * +-- 第○ ■曜日の日付を取得します。
      *
      * @access      public
@@ -336,31 +298,33 @@ class JapaneseDate
      */
     public function getDayByWeekly($year, $month, $weekly, $renb = 1, $timezone = NULL)
     {
+        // @codeCoverageIgnoreStart
         switch ($weekly) {
-            case 0:
+        // @codeCoverageIgnoreEnd
+            case JapaneseDateTime::SUNDAY:
                 $map = array(7, 1, 2, 3, 4, 5, 6, );
             break;
-            case 1:
+            case JapaneseDateTime::MONDAY:
                 $map = array(6, 7, 1, 2, 3, 4, 5, );
             break;
-            case 2:
+            case JapaneseDateTime::TUESDAY:
                 $map = array(5, 6, 7, 1, 2, 3, 4, );
             break;
-            case 3:
+            case JapaneseDateTime::WEDNESDAY:
                 $map = array(4, 5, 6, 7, 1, 2, 3, );
             break;
-            case 4:
+            case JapaneseDateTime::THURSDAY:
                 $map = array(3, 4, 5, 6, 7, 1, 2, );
             break;
-            case 5:
+            case JapaneseDateTime::FRIDAY:
                 $map = array(2, 3, 4, 5, 6, 7, 1, );
             break;
-            case 6:
+            case JapaneseDateTime::SATURDAY:
                 $map = array(1, 2, 3, 4, 5, 6, 7, );
             break;
         }
 
-        $renb = 7*$renb+1;
+        $renb = 7 * $renb + 1;
         return $renb - $map[$this->getWeekday(mktime(0, 0, 0, $month, 1, $year), $timezone)];
     }
     /* ----------------------------------------- */
@@ -723,8 +687,6 @@ class JapaneseDate
     /* ----------------------------------------- */
 
 
-
-
     /**
      * +-- 七曜を数値化して返します
      *
@@ -738,31 +700,6 @@ class JapaneseDate
     }
     /* ----------------------------------------- */
 
-    /**
-     * +-- 年を数値化して返します
-     *
-     *
-     * @access      protected
-     * @return      int
-     */
-    protected function getYear($time_stamp)
-    {
-        return (int)$this->JapaneseDateTime($time_stamp)->format('Y');
-    }
-    /* ----------------------------------------- */
-
-    /**
-     * +-- 月を数値化して返します
-     *
-     *
-     * @access      protected
-     * @return      int
-     */
-    protected function getMonth($time_stamp)
-    {
-        return (int)$this->JapaneseDateTime($time_stamp)->format('n');
-    }
-    /* ----------------------------------------- */
 
     /**
      * +-- 日を数値化して返します
@@ -787,9 +724,11 @@ class JapaneseDate
      */
     protected function JapaneseDateTime($time_stamp, $timezone = NULL)
     {
+        // @codeCoverageIgnoreStart
         if ($time_stamp instanceof JapaneseDateTime) {
             return $time_stamp;
         }
+        // @codeCoverageIgnoreEnd
         return new JapaneseDateTime($time_stamp, $timezone);
     }
     /* ----------------------------------------- */

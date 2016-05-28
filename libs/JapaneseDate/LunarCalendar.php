@@ -54,8 +54,9 @@ class LunarCalendar
      */
     public function __construct()
     {
-        $this->k = M_PI / 180;
-        $this->tdt = (gmmktime(0,0,0,1,1,2000) - mktime(0,0,0,1,1,2000)) / 86400;
+        $this->k = 3.141592653589793238462 / 180;
+        // $this->tdt = (gmmktime(0,0,0,1,1,2000) - mktime(0,0,0,1,1,2000)) / 86400;
+        $this->tdt = 9.0/24.0;
     }
     /* ----------------------------------------- */
 
@@ -76,29 +77,6 @@ class LunarCalendar
     }
     /* ----------------------------------------- */
 
-    /**
-     * +-- 旧暦カレンダー取得
-     *
-     *
-     * @access      public
-     * @param       int $time_stamp ユニックスタイムスタンプ
-     * @return      array
-     */
-    public function getLunarCalendar($time_stamp)
-    {
-        $date = explode('-', date('H-i-s-m-d-Y', $time_stamp));
-
-        return $this->getLunarCalendarByMktime(
-            $date[0],
-            $date[1],
-            $date[2],
-            $date[3],
-            $date[4],
-            $date[5]
-        );
-    }
-    /* ----------------------------------------- */
-
 
     /**
      * +-- タイムスタンプからユリウス暦を取得します。
@@ -109,57 +87,30 @@ class LunarCalendar
      */
     public function time2JD($time_stamp)
     {
+        $date = explode('-', date('H-i-s-m-d-Y', $time_stamp));
+        return $this->makeJD(
+            $date[0],
+            $date[1],
+            $date[2],
+            $date[3],
+            $date[4],
+            $date[5]
+  );
+        /*
         $date = explode('-', date('m-d-Y', $time_stamp));
         return gregoriantojd(
             $date[0],
             $date[1],
             $date[2]
-        );
+  );
+   */
     }
     /* ----------------------------------------- */
-
-
-    /**
-     * +-- 旧暦カレンダーリストを取得
-     *
-     * @access      public
-     * @param       array $time_stamp_array
-     * @param       int    $mode データ取得モード
-     * @return      array
-     */
-    public function getLunaCalendarList(array $time_array, $mode = self::JD_KEY_ORDERED)
-    {
-        sort($time_array);
-        $max_key = count($time_array) - 1;
-        $lim  = (date("Y", $time_array[$max_key]) - date("Y", $time_array[0])) * 12;
-        $lim += (date("m", $time_array[$max_key]) - date("m", $time_array[0]));
-
-        $tm = $this->time2JD($time_array[0]);
-        $m = $this->getTsuitachiList($tm, $lim + 6);
-        if ($mode == self::JD_KEY_ORDERED) {
-            foreach ($time_array as $key => $time) {
-                $res[$key]         = $this->getCalendarByTList($this->time2JD($time), $m);
-                $res[$key]['time'] = $time;
-            }
-        } else {
-            foreach ($time_array as $key => $time) {
-                $res[$time]         = $this->getCalendarByTList($this->time2JD($time), $m);
-                $res[$time]['time'] = $time;
-            }
-        }
-        return $res;
-
-    }
-    /* ----------------------------------------- */
-
 
 
     /**
      * +-- mktimeと同じインターフェイスで、旧暦変換を行う
      *
-     * @param       int $hour 時
-     * @param       int $minute 分
-     * @param       int $second 秒
      * @param       int $month 月
      * @param       int $day 日
      * @param       int $year 年
@@ -167,7 +118,7 @@ class LunarCalendar
      */
     public function getLunarCalendarByMDY($month, $day, $year)
     {
-        static $tsuitachi_list,$lunar_calendar;
+        static $tsuitachi_list, $lunar_calendar;
 
         $lim = 14;
         $tm = gregoriantojd($month, $day, $year);
@@ -189,29 +140,6 @@ class LunarCalendar
         }
 
         return $lunar_calendar[$tm] = $this->getCalendarByTList($tm, $m, $kyureki_id);
-    }
-    /* ----------------------------------------- */
-
-
-
-
-    /**
-     * +-- mktimeと同じインターフェイスで、旧暦変換を行う
-     *
-     * @param       int $hour 時
-     * @param       int $minute 分
-     * @param       int $second 秒
-     * @param       int $month 月
-     * @param       int $day 日
-     * @param       int $year 年
-     * @return      array
-     */
-    public function getLunarCalendarByMktime($hour, $minute, $second, $month, $day, $year)
-    {
-        $lim = 12;
-        $tm = $this->makeJD($hour, $minute, $second, $month, $day, $year);
-        $m = $this->getTsuitachiList($tm, $lim + 6);
-        return $this->getCalendarByTList($tm, $m);
     }
     /* ----------------------------------------- */
 
@@ -368,15 +296,14 @@ class LunarCalendar
         }
 
         $kyureki['day'] = $jd - $kyureki['jd'];
-        $kyureki['time_stamp'] = mktime(0, 0, 0, $kyureki['month'], $kyureki['day'], $kyureki['year']);
 
         // 月齢を求める
         $kyureki['mage'] = $jd - $kyureki['jd'];
-        if($kyureki['mage'] < 0) {
+        if ($kyureki['mage'] < 0) {
             $kyureki['mage'] = $jd - $m[$i - 1]['jd'];
         }
         $kyureki['magenoon'] = $jd + 0.5 - $kyureki['jd'];
-        if($kyureki['magenoon'] < 0) {
+        if ($kyureki['magenoon'] < 0) {
             $kyureki['magenoon'] = $jd + .5 - $m[$i - 1]['jd'];
         }
         // 輝面比を求める
@@ -393,7 +320,7 @@ class LunarCalendar
 
         // 月相を求める（輝面比の計算で求めた変数 t を使用）
         $kyureki['mphase'] = (int)($rm_angle / 360 * 28 + .5);
-        if($kyureki['mphase'] == 28) {
+        if ($kyureki['mphase'] == 28) {
             $kyureki['mphase'] = 0;
         }
 
@@ -403,15 +330,26 @@ class LunarCalendar
 
         // ユリウス暦
         $kyureki['jd'] = $jd;
-        $kyureki['chuki'][0] = (int)($kyureki['chuki'][0]);
+        $kyureki['chuki_data'] = $kyureki['chuki'];
+        $kyureki['chuki']       = $kyureki['chuki'][0];
+
 
         // 中気かどうか
-        if ($kyureki['chuki'][0] && $kyureki['chuki'][0] == $kyureki['jd']) {
-            $kyureki['is_chuki'] = $kyureki['chuki'][1];
-        } else {
-            $kyureki['is_chuki'] = false;
+        $kyureki['is_chuki'] = false;
+        foreach ($m as $key => $item) {
+            if (!(isset($item['chuki'][0]) && $item['chuki'][0])){
+                continue;
+            }
+            $ck = $this->toIntJD($item['chuki'][0]);
+            if ($ck === $jd) {
+                $kyureki['is_chuki']    = true;
+                $kyureki['chuki']       = $item['chuki'][0];
+                $kyureki['chuki_data']  = $item;
+                break;
+            }
         }
-        $kyureki['chuki'] = $kyureki['chuki'][0];
+
+
         return $kyureki;
     }
     /* ----------------------------------------- */
@@ -427,57 +365,137 @@ class LunarCalendar
      */
     protected function getChu($tm, $longitude = self::JD_CHU)
     {
+        if ($longitude === self::JD_CHU) {
+            return $this->calcChu($tm);
+        }
+        return $this->calcBeforeNibun($tm);
+    }
+    /* ----------------------------------------- */
+
+
+
+
+    protected function calcChu($tm)
+    {
         // 時刻引数を分解する
-        $tm1 = (int)($tm);
+        $tm1 = (int)($tm );
         $tm2 = $tm - $tm1;
+
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
-        $tm2 -= $this->tdt;
-        // 中気の黄経 Tsun0 を求める
-        $t = ($tm2 + 0.5) / 36525.0;
-        $t = $t + ($tm1 - 2451545.0) / 36525.0;
-        $rm_sun  = $this->celestialLongitudeOfTheSun($t);
-        $rm_sun0 = $longitude * (int)($rm_sun / $longitude);
+        $tm2-=9.0/24.0;
+
+        // 中気の黄経 λsun0 を求める
+        $t=($tm2+0.5) / 36525.0;
+        $t=$t + ($tm1-2451545.0) / 36525.0;
+        $rm_sun = $this->celestialLongitudeOfTheSun($t );
+        $rm_sun0 = 30.0*(int)($rm_sun/30.0);
+
         // 繰り返し計算によって中気の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
-        $delta_t2 = 1.0;
-        for (; abs($delta_t1 + $delta_t2) > (1.0 / 86400.0) ;) {
-            // Tsun を計算
-            $t = ($tm2 + 0.5) / 36525.0;
-            $t = $t + ($tm1-2451545.0) / 36525.0;
-            $rm_sun = $this->celestialLongitudeOfTheSun($t);
-            // 黄経差 △T=Tsun -Tsun0
+        for ($delta_t2 = 1.0 ; abs($delta_t1 + $delta_t2 ) > (1.0 / 86400.0 ) ;) {
+            // λsun を計算
+            $t =($tm2+0.5) / 36525.0;
+            $t =$t + ($tm1-2451545.0) / 36525.0;
+            $rm_sun=$this->celestialLongitudeOfTheSun($t );
+
+            // 黄経差 Δλ＝λsun －λsun0
             $delta_rm = $rm_sun - $rm_sun0 ;
-            // △Tの引き込み範囲（±180°）を逸脱した場合には、補正を行う
-            if ($delta_rm > 180.0) {
-                $delta_rm -= 360.0;
-            } elseif ($delta_rm < -180.0) {
-                $delta_rm += 360.0;
+
+            // Δλの引き込み範囲（±180°）を逸脱した場合には、補正を行う
+            if ($delta_rm > 180.0 ){
+                $delta_rm-=360.0;
+            } elseif ($delta_rm < -180.0 ){
+                $delta_rm+=360.0;
             }
-            // 時刻引数の補正値 △t
+
+            // 時刻引数の補正値 Δt
             // delta_t = delta_rm * 365.2 / 360.0;
             $delta_t1 = (int)($delta_rm * 365.2 / 360.0);
             $delta_t2 = $delta_rm * 365.2 / 360.0;
             $delta_t2 -= $delta_t1;
+
             // 時刻引数の補正
             // tm -= delta_t;
             $tm1 = $tm1 - $delta_t1;
             $tm2 = $tm2 - $delta_t2;
-            if ($tm2 < 0) {
-                $tm2 += 1.0;
-                $tm1 -= 1.0;
+            if ($tm2 < 0){
+                $tm2+=1.0;$tm1-=1.0;
             }
         }
+
         // 戻り値の作成
-        // chu[i, 0]:時刻引数を合成するのと、DT ==> JST 変換を行い、戻り値とする
+        // chu[i,0]:時刻引数を合成するのと、DT ==> JST 変換を行い、戻り値とする
         // （補正時刻=0.0sec と仮定して計算）
-        // chu[i, 1]:黄経
-        $temp[0] = $tm2 + $this->tdt;
+        // chu[i,1]:黄経
+        $temp[0] = $tm2+9.0/24.0;
         $temp[0] += $tm1;
         $temp[1] = $rm_sun0;
-        return array($temp[0], $temp[1]);
+        return array($temp[0],$temp[1]);
     }
-    /* ----------------------------------------- */
+
+
+    protected function calcBeforeNibun($tm)
+    {
+
+        // 時刻引数を分解する
+        $tm1 = (int)($tm );
+        $tm2 = $tm - $tm1;
+
+        // JST ==> DT （補正時刻=0.0sec と仮定して計算）
+        $tm2-=9.0/24.0;
+
+        // 直前の二分二至の黄経 λsun0 を求める
+        $t=($tm2+0.5) / 36525.0;
+        $t=$t + ($tm1-2451545.0) / 36525.0;
+        $rm_sun=$this->celestialLongitudeOfTheSun($t );
+        $rm_sun0=90*(int)($rm_sun/90.0);
+
+        // 繰り返し計算によって直前の二分二至の時刻を計算する
+        // （誤差が±1.0 sec以内になったら打ち切る。）
+        $delta_t1 = 0;
+        for($delta_t2 = 1.0 ; abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 ) ; ){
+            // λsun を計算
+            $t = ($tm2+0.5) / 36525.0;
+            $t = $t + ($tm1-2451545.0) / 36525.0;
+            $rm_sun = $this->celestialLongitudeOfTheSun($t );
+
+            // 黄経差 Δλ＝λsun －λsun0
+            $delta_rm = $rm_sun - $rm_sun0 ;
+
+            // Δλの引き込み範囲（±180°）を逸脱した場合には、補正を行う
+            if ($delta_rm > 180.0) {
+                $delta_rm-=360.0;
+            } elseif ($delta_rm < -180.0) {
+                $delta_rm+=360.0;
+            }
+
+            // 時刻引数の補正値 Δt
+            // delta_t = delta_rm * 365.2 / 360.0;
+            $delta_t1 = (int)($delta_rm * 365.2 / 360.0);
+            $delta_t2 = $delta_rm * 365.2 / 360.0;
+            $delta_t2 -= $delta_t1;
+
+            // 時刻引数の補正
+            // tm -= delta_t;
+            $tm1 = $tm1 - $delta_t1;
+            $tm2 = $tm2 - $delta_t2;
+            if ($tm2 < 0){
+                $tm2+=1.0;$tm1-=1.0;
+            }
+        }
+
+        // 戻り値の作成
+        // nibun[0,0]:時刻引数を合成するのと、DT ==> JST 変換を行い、戻り値とする
+        // （補正時刻=0.0sec と仮定して計算）
+        // nibun[0,1]:黄経
+        $nibun[0] = $tm2+9.0/24.0;
+        $nibun[0] += $tm1;
+        $nibun[1] = $rm_sun0;
+
+        return array($nibun[0],$nibun[1]);
+    }
+
 
 
 
@@ -492,64 +510,69 @@ class LunarCalendar
     {
         // ループカウンタのセット
         $lc = 1;
+
         // 時刻引数を分解する
-        $tm1 = (int)($tm);
+        $tm1 = (int)($tm );
         $tm2 = $tm - $tm1;
+
         // JST ==> DT （補正時刻=0.0sec と仮定して計算）
         $tm2 -= $this->tdt;
+
         // 繰り返し計算によって朔の時刻を計算する
         // （誤差が±1.0 sec以内になったら打ち切る。）
         $delta_t1 = 0;
-        $delta_t2 = 1.0;
-        for (; abs($delta_t1 + $delta_t2) > (1.0 / 86400.0) ; $lc++) {
-            // 太陽の黄経Tsun , 月の黄経Tmoon を計算
+        for ($delta_t2 = 1.0 ; abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 ) ; $lc++) {
+            // 太陽の黄経λsun ,月の黄経λmoon を計算
             // t = (tm - 2451548.0 + 0.5)/36525.0;
-            $t = ($tm2 + 0.5) / 36525.0;
-            $t = $t + ($tm1-2451545.0) / 36525.0;
-            $rm_sun  = $this->celestialLongitudeOfTheSun($t);
-            $rm_moon = $this->celestialLongitudeOfTheMoon($t);
-            // 月と太陽の黄経差△T
-            // △T=Tmoon-Tsun
+            $t=($tm2+0.5) / 36525.0;
+            $t=$t + ($tm1-2451545.0) / 36525.0;
+            $rm_sun=$this->celestialLongitudeOfTheSun($t );
+            $rm_moon=$this->celestialLongitudeOfTheMoon($t );
+
+            // 月と太陽の黄経差Δλ
+            // Δλ＝λmoon－λsun
             $delta_rm = $rm_moon - $rm_sun ;
+
             // ループの１回目（lc=1）で delta_rm < 0.0 の場合には引き込み範囲に
             // 入るように補正する
-            if ($lc === 1 && $delta_rm < 0.0) {
-                $delta_rm = $this->angleNormalize($delta_rm);
-            } elseif ($rm_sun >= 0 && $rm_sun <= 20 && $rm_moon >= 300) {
-                // 春分の近くで朔がある場合（0 ≦Tsun≦ 20）で、月の黄経Tmoon≧300 の
-                // 場合には、△T= 360.0 - △T と計算して補正する
-                $delta_rm = $this->angleNormalize($delta_rm);
+            if ($lc === 1 && $delta_rm < 0.0 ){
+                $delta_rm = $this->angleNormalize($delta_rm );
+            } elseif ($rm_sun >= 0 && $rm_sun <= 20 && $rm_moon >= 300 ){
+                // 春分の近くで朔がある場合（0 ≦λsun≦ 20）で、月の黄経λmoon≧300 の
+                // 場合には、Δλ＝ 360.0 － Δλ と計算して補正する
+                $delta_rm = $this->angleNormalize($delta_rm );
                 $delta_rm = 360.0 - $delta_rm;
-            } elseif (abs($delta_rm) > 40.0) {
-                // △Tの引き込み範囲（±40°）を逸脱した場合には、補正を行う
-                $delta_rm = $this->angleNormalize($delta_rm);
+            } elseif (abs($delta_rm ) > 40.0) {
+                // Δλの引き込み範囲（±40°）を逸脱した場合には、補正を行う
+                $delta_rm = $this->angleNormalize($delta_rm );
             }
-            // 時刻引数の補正値 △t
+
+            // 時刻引数の補正値 Δt
             // delta_t = delta_rm * 29.530589 / 360.0;
             $delta_t1 = (int)($delta_rm * 29.530589 / 360.0);
             $delta_t2 = $delta_rm * 29.530589 / 360.0;
             $delta_t2 -= $delta_t1;
+
             // 時刻引数の補正
             // tm -= delta_t;
             $tm1 = $tm1 - $delta_t1;
             $tm2 = $tm2 - $delta_t2;
-            if ($tm2 < 0.0) {
-                $tm2+=1.0;
-                $tm1-=1.0;
+            if ($tm2 < 0.0){
+                $tm2+=1.0;$tm1-=1.0;
             }
 
-            if ($lc == 15 && abs($delta_t1 + $delta_t2) > (1.0 / 86400.0)) {
-                // ループ回数が15回になったら、初期値 tm を tm-26 とする。
-                $tm1 = (int)($tm-26);
+            // ループ回数が15回になったら、初期値 tm を tm-26 とする。
+            if ($lc == 15 && abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 )) {
+                $tm1 = (int)($tm-26 );
                 $tm2 = 0;
-            } elseif ($lc > 30 && abs($delta_t1 + $delta_t2) > (1.0 / 86400.0)) {
+            } elseif ($lc > 30 && abs($delta_t1+$delta_t2 ) > (1.0 / 86400.0 )) {
                 // 初期値を補正したにも関わらず、振動を続ける場合には初期値を答えとして
                 // 返して強制的にループを抜け出して異常終了させる。
-                $tm1 = $tm;
-                $tm2 = 0;
+                $tm1=$tm;$tm2=0;
                 break;
             }
         }
+
         // 時刻引数を合成するのと、DT ==> JST 変換を行い、戻り値とする
         // （補正時刻=0.0sec と仮定して計算）
         return($tm2 + $tm1 + $this->tdt);
@@ -570,7 +593,7 @@ class LunarCalendar
             $angle1 = -$angle;
             $angle1 -= 360 * (int)($angle1 / 360);
             $angle1 = 360 - $angle1;
-        } else{
+        } else {
             $angle1 = $angle - 360 * (int)($angle / 360);
         }
         return $angle1;
@@ -587,37 +610,40 @@ class LunarCalendar
      */
     protected function celestialLongitudeOfTheSun($t)
     {
+        $k= $this->k;
+
+        // 摂動項の計算
         $ang = $this->angleNormalize(31557.0 * $t + 161.0);
-        $th  = 0.0004 * cos($this->k * $ang);
+        $th =       .0004 * cos($k*$ang);
         $ang = $this->angleNormalize(29930.0 * $t + 48.0);
-        $th  = $th + 0.0004 * cos($this->k * $ang);
+        $th = $th + .0004 * cos($k*$ang);
         $ang = $this->angleNormalize(2281.0 * $t + 221.0);
-        $th  = $th + 0.0005 * cos($this->k * $ang);
+        $th = $th + .0005 * cos($k*$ang);
         $ang = $this->angleNormalize(155.0 * $t + 118.0);
-        $th  = $th + 0.0005 * cos($this->k * $ang);
+        $th = $th + .0005 * cos($k*$ang);
         $ang = $this->angleNormalize(33718.0 * $t + 316.0);
-        $th  = $th + 0.0006 * cos($this->k * $ang);
+        $th = $th + .0006 * cos($k*$ang);
         $ang = $this->angleNormalize(9038.0 * $t + 64.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(3035.0 * $t + 110.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(65929.0 * $t + 45.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(22519.0 * $t + 352.0);
-        $th  = $th + 0.0013 * cos($this->k * $ang);
+        $th = $th + .0013 * cos($k*$ang);
         $ang = $this->angleNormalize(45038.0 * $t + 254.0);
-        $th  = $th + 0.0015 * cos($this->k * $ang);
+        $th = $th + .0015 * cos($k*$ang);
         $ang = $this->angleNormalize(445267.0 * $t + 208.0);
-        $th  = $th + 0.0018 * cos($this->k * $ang);
+        $th = $th + .0018 * cos($k*$ang);
         $ang = $this->angleNormalize(19.0 * $t + 159.0);
-        $th  = $th + 0.0018 * cos($this->k * $ang);
+        $th = $th + .0018 * cos($k*$ang);
         $ang = $this->angleNormalize(32964.0 * $t + 158.0);
-        $th  = $th + 0.0020 * cos($this->k * $ang);
+        $th = $th + .0020 * cos($k*$ang);
         $ang = $this->angleNormalize(71998.1 * $t + 265.1);
-        $th  = $th + 0.0200 * cos($this->k * $ang);
+        $th = $th + .0200 * cos($k*$ang);
         $ang = $this->angleNormalize(35999.05 * $t + 267.52);
-        $th  = $th - 0.0048 * $t * cos($this->k * $ang) ;
-        $th  = $th + 1.9147 * cos($this->k * $ang) ;
+        $th = $th - 0.0048 * $t * cos($k*$ang) ;
+        $th = $th + 1.9147 * cos($k*$ang) ;
         // 比例項の計算
         $ang = $this->angleNormalize(36000.7695 * $t);
         $ang = $this->angleNormalize($ang + 280.4659);
@@ -627,7 +653,7 @@ class LunarCalendar
     /* ----------------------------------------- */
 
     /**
-     * +--
+     * +-- 月の黄経 λmoon を計算する
      *
      * @access      protected
      * @param       var_text $t
@@ -635,133 +661,136 @@ class LunarCalendar
      */
     protected function celestialLongitudeOfTheMoon($t)
     {
+        $k= $this->k;
+
         // 摂動項の計算
         $ang = $this->angleNormalize(2322131.0 * $t + 191.0);
-        $th  = 0.0003 * cos($this->k * $ang);
+        $th =      .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(4067.0 * $t + 70.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(549197.0 * $t + 220.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(1808933.0 * $t + 58.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(349472.0 * $t + 337.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(381404.0 * $t + 354.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(958465.0 * $t + 340.0);
-        $th  = $th + 0.0003 * cos($this->k * $ang);
+        $th = $th + .0003 * cos($k*$ang);
         $ang = $this->angleNormalize(12006.0 * $t + 187.0);
-        $th  = $th + 0.0004 * cos($this->k * $ang);
+        $th = $th + .0004 * cos($k*$ang);
         $ang = $this->angleNormalize(39871.0 * $t + 223.0);
-        $th  = $th + 0.0004 * cos($this->k * $ang);
+        $th = $th + .0004 * cos($k*$ang);
         $ang = $this->angleNormalize(509131.0 * $t + 242.0);
-        $th  = $th + 0.0005 * cos($this->k * $ang);
+        $th = $th + .0005 * cos($k*$ang);
         $ang = $this->angleNormalize(1745069.0 * $t + 24.0);
-        $th  = $th + 0.0005 * cos($this->k * $ang);
+        $th = $th + .0005 * cos($k*$ang);
         $ang = $this->angleNormalize(1908795.0 * $t + 90.0);
-        $th  = $th + 0.0005 * cos($this->k * $ang);
+        $th = $th + .0005 * cos($k*$ang);
         $ang = $this->angleNormalize(2258267.0 * $t + 156.0);
-        $th  = $th + 0.0006 * cos($this->k * $ang);
+        $th = $th + .0006 * cos($k*$ang);
         $ang = $this->angleNormalize(111869.0 * $t + 38.0);
-        $th  = $th + 0.0006 * cos($this->k * $ang);
+        $th = $th + .0006 * cos($k*$ang);
         $ang = $this->angleNormalize(27864.0 * $t + 127.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(485333.0 * $t + 186.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(405201.0 * $t + 50.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(790672.0 * $t + 114.0);
-        $th  = $th + 0.0007 * cos($this->k * $ang);
+        $th = $th + .0007 * cos($k*$ang);
         $ang = $this->angleNormalize(1403732.0 * $t + 98.0);
-        $th  = $th + 0.0008 * cos($this->k * $ang);
+        $th = $th + .0008 * cos($k*$ang);
         $ang = $this->angleNormalize(858602.0 * $t + 129.0);
-        $th  = $th + 0.0009 * cos($this->k * $ang);
+        $th = $th + .0009 * cos($k*$ang);
         $ang = $this->angleNormalize(1920802.0 * $t + 186.0);
-        $th  = $th + 0.0011 * cos($this->k * $ang);
+        $th = $th + .0011 * cos($k*$ang);
         $ang = $this->angleNormalize(1267871.0 * $t + 249.0);
-        $th  = $th + 0.0012 * cos($this->k * $ang);
+        $th = $th + .0012 * cos($k*$ang);
         $ang = $this->angleNormalize(1856938.0 * $t + 152.0);
-        $th  = $th + 0.0016 * cos($this->k * $ang);
+        $th = $th + .0016 * cos($k*$ang);
         $ang = $this->angleNormalize(401329.0 * $t + 274.0);
-        $th  = $th + 0.0018 * cos($this->k * $ang);
+        $th = $th + .0018 * cos($k*$ang);
         $ang = $this->angleNormalize(341337.0 * $t + 16.0);
-        $th  = $th + 0.0021 * cos($this->k * $ang);
+        $th = $th + .0021 * cos($k*$ang);
         $ang = $this->angleNormalize(71998.0 * $t + 85.0);
-        $th  = $th + 0.0021 * cos($this->k * $ang);
+        $th = $th + .0021 * cos($k*$ang);
         $ang = $this->angleNormalize(990397.0 * $t + 357.0);
-        $th  = $th + 0.0021 * cos($this->k * $ang);
+        $th = $th + .0021 * cos($k*$ang);
         $ang = $this->angleNormalize(818536.0 * $t + 151.0);
-        $th  = $th + 0.0022 * cos($this->k * $ang);
+        $th = $th + .0022 * cos($k*$ang);
         $ang = $this->angleNormalize(922466.0 * $t + 163.0);
-        $th  = $th + 0.0023 * cos($this->k * $ang);
+        $th = $th + .0023 * cos($k*$ang);
         $ang = $this->angleNormalize(99863.0 * $t + 122.0);
-        $th  = $th + 0.0024 * cos($this->k * $ang);
+        $th = $th + .0024 * cos($k*$ang);
         $ang = $this->angleNormalize(1379739.0 * $t + 17.0);
-        $th  = $th + 0.0026 * cos($this->k * $ang);
+        $th = $th + .0026 * cos($k*$ang);
         $ang = $this->angleNormalize(918399.0 * $t + 182.0);
-        $th  = $th + 0.0027 * cos($this->k * $ang);
+        $th = $th + .0027 * cos($k*$ang);
         $ang = $this->angleNormalize(1934.0 * $t + 145.0);
-        $th  = $th + 0.0028 * cos($this->k * $ang);
+        $th = $th + .0028 * cos($k*$ang);
         $ang = $this->angleNormalize(541062.0 * $t + 259.0);
-        $th  = $th + 0.0037 * cos($this->k * $ang);
+        $th = $th + .0037 * cos($k*$ang);
         $ang = $this->angleNormalize(1781068.0 * $t + 21.0);
-        $th  = $th + 0.0038 * cos($this->k * $ang);
+        $th = $th + .0038 * cos($k*$ang);
         $ang = $this->angleNormalize(133.0 * $t + 29.0);
-        $th  = $th + 0.0040 * cos($this->k * $ang);
+        $th = $th + .0040 * cos($k*$ang);
         $ang = $this->angleNormalize(1844932.0 * $t + 56.0);
-        $th  = $th + 0.0040 * cos($this->k * $ang);
+        $th = $th + .0040 * cos($k*$ang);
         $ang = $this->angleNormalize(1331734.0 * $t + 283.0);
-        $th  = $th + 0.0040 * cos($this->k * $ang);
+        $th = $th + .0040 * cos($k*$ang);
         $ang = $this->angleNormalize(481266.0 * $t + 205.0);
-        $th  = $th + 0.0050 * cos($this->k * $ang);
+        $th = $th + .0050 * cos($k*$ang);
         $ang = $this->angleNormalize(31932.0 * $t + 107.0);
-        $th  = $th + 0.0052 * cos($this->k * $ang);
+        $th = $th + .0052 * cos($k*$ang);
         $ang = $this->angleNormalize(926533.0 * $t + 323.0);
-        $th  = $th + 0.0068 * cos($this->k * $ang);
+        $th = $th + .0068 * cos($k*$ang);
         $ang = $this->angleNormalize(449334.0 * $t + 188.0);
-        $th  = $th + 0.0079 * cos($this->k * $ang);
+        $th = $th + .0079 * cos($k*$ang);
         $ang = $this->angleNormalize(826671.0 * $t + 111.0);
-        $th  = $th + 0.0085 * cos($this->k * $ang);
+        $th = $th + .0085 * cos($k*$ang);
         $ang = $this->angleNormalize(1431597.0 * $t + 315.0);
-        $th  = $th + 0.0100 * cos($this->k * $ang);
+        $th = $th + .0100 * cos($k*$ang);
         $ang = $this->angleNormalize(1303870.0 * $t + 246.0);
-        $th  = $th + 0.0107 * cos($this->k * $ang);
+        $th = $th + .0107 * cos($k*$ang);
         $ang = $this->angleNormalize(489205.0 * $t + 142.0);
-        $th  = $th + 0.0110 * cos($this->k * $ang);
+        $th = $th + .0110 * cos($k*$ang);
         $ang = $this->angleNormalize(1443603.0 * $t + 52.0);
-        $th  = $th + 0.0125 * cos($this->k * $ang);
+        $th = $th + .0125 * cos($k*$ang);
         $ang = $this->angleNormalize(75870.0 * $t + 41.0);
-        $th  = $th + 0.0154 * cos($this->k * $ang);
+        $th = $th + .0154 * cos($k*$ang);
         $ang = $this->angleNormalize(513197.9 * $t + 222.5);
-        $th  = $th + 0.0304 * cos($this->k * $ang);
+        $th = $th + .0304 * cos($k*$ang);
         $ang = $this->angleNormalize(445267.1 * $t + 27.9);
-        $th  = $th + 0.0347 * cos($this->k * $ang);
+        $th = $th + .0347 * cos($k*$ang);
         $ang = $this->angleNormalize(441199.8 * $t + 47.4);
-        $th  = $th + 0.0409 * cos($this->k * $ang);
+        $th = $th + .0409 * cos($k*$ang);
         $ang = $this->angleNormalize(854535.2 * $t + 148.2);
-        $th  = $th + 0.0458 * cos($this->k * $ang);
+        $th = $th + .0458 * cos($k*$ang);
         $ang = $this->angleNormalize(1367733.1 * $t + 280.7);
-        $th  = $th + 0.0533 * cos($this->k * $ang);
+        $th = $th + .0533 * cos($k*$ang);
         $ang = $this->angleNormalize(377336.3 * $t + 13.2);
-        $th  = $th + 0.0571 * cos($this->k * $ang);
+        $th = $th + .0571 * cos($k*$ang);
         $ang = $this->angleNormalize(63863.5 * $t + 124.2);
-        $th  = $th + 0.0588 * cos($this->k * $ang);
+        $th = $th + .0588 * cos($k*$ang);
         $ang = $this->angleNormalize(966404.0 * $t + 276.5);
-        $th  = $th + 0.1144 * cos($this->k * $ang);
+        $th = $th + .1144 * cos($k*$ang);
         $ang = $this->angleNormalize(35999.05 * $t + 87.53);
-        $th  = $th + 0.1851 * cos($this->k * $ang);
+        $th = $th + .1851 * cos($k*$ang);
         $ang = $this->angleNormalize(954397.74 * $t + 179.93);
-        $th  = $th + 0.2136 * cos($this->k * $ang);
+        $th = $th + .2136 * cos($k*$ang);
         $ang = $this->angleNormalize(890534.22 * $t + 145.7);
-        $th  = $th + 0.6583 * cos($this->k * $ang);
+        $th = $th + .6583 * cos($k*$ang);
         $ang = $this->angleNormalize(413335.35 * $t + 10.74);
-        $th  = $th + 1.2740 * cos($this->k * $ang);
+        $th = $th + 1.2740 * cos($k*$ang);
         $ang = $this->angleNormalize(477198.868 * $t + 44.963);
-        $th  = $th + 6.2888 * cos($this->k * $ang);
+        $th = $th + 6.2888 * cos($k*$ang);
+
         // 比例項の計算
         $ang = $this->angleNormalize(481267.8809 * $t);
         $ang = $this->angleNormalize($ang + 218.3162);
-        $th  = $this->angleNormalize($th + $ang);
+        $th  = $this->angleNormalize($th  + $ang);
         return($th);
     }
     /* ----------------------------------------- */
@@ -778,27 +807,26 @@ class LunarCalendar
      * @param       var_text $year
      * @return      float
      */
-    protected function makeJD($hour, $minute, $second, $month, $day, $year)
-        {
+    public function makeJD($hour, $minute, $second, $month, $day, $year)
+    {
         if ($month < 3.0) {
             $year -= 1.0;
             $month += 12.0;
         }
-        $jd  = $this->flce(365.25 * $year);
-        $jd += $this->flce($year / 400.0);
-        $jd -= $this->flce($year / 100.0);
-        $jd += $this->flce(30.59 * ($month-2.0));
+        $jd  = (int)(365.25 * $year);
+        $jd += (int)($year / 400.0);
+        $jd -= (int)($year / 100.0);
+        $jd += (int)(30.59 * ($month-2.0));
         $jd += 1721088;
         $jd += $day;
-        $t   = $second / 3600.0;
-        $t  += $minute /60.0;
-        $t  += $hour;
-        $t   = $t / 24.0;
+        $t  = $second / 3600.0;
+        $t += $minute /60.0;
+        $t += $hour;
+        $t  = $t / 24.0;
         $jd += $t;
-        return($jd)+1;
+        return ($jd);
     }
     /* ----------------------------------------- */
-
 
     protected function JD2DateArray($JD)
     {
@@ -810,26 +838,37 @@ class LunarCalendar
         $x5 = (int)((int)($x4) / 30.59);
         $x6 = (int)((int)($x5) / 11.0);
         $res[2] = $x4 - (int)(30.59 * $x5);
-        $res[1] = $x5 - 12 * $x6 + 2;
+        $res[1] = $x5 - 12*$x6 + 2;
         $res[0] = 100 * ($x1 - 49) + $x3 + $x6;
         // 2月30日の補正
-        if ($res[1]==2 && $res[2] > 28) {
+        if ($res[1] === 2 && $res[2] > 28){
             if ($res[0] % 100 == 0 && $res[0] % 400 == 0) {
-                $res[2] = 29;
+                $res[2]=29;
             } elseif ($res[0] % 4 == 0) {
-                $res[2] = 29;
-            } else{
-                $res[2] = 28;
+                $res[2]=29;
+            } else {
+                $res[2]=28;
             }
         }
-        return array($res[0], $res[1], $res[2]);
-
-        // $tm = 86400.0 * ($JD - (int)($JD));
-
-        // $res[3] = (int)($tm / 3600.0);
-        // $res[4] = (int)(($tm - 3600.0 * $res[3]) / 60.0);
-        // $res[5] = (int)($tm - 3600.0 * $res[3] - 60 * $res[4]);
-        // return array($res[0], $res[1], $res[2], $res[3], $res[4], $res[5]);
+        $tm     = 86400.0*($JD - (int)($JD));
+        $res[3] = (int)($tm/3600.0);
+        $res[4] = (int)(($tm - 3600.0*$res[3]) / 60.0);
+        $res[5] = (int)($tm - 3600.0*$res[3] - 60*$res[4]);
+        return array($res[0], $res[1], $res[2], $res[3], $res[4], $res[5]);
     }
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       var_text $JD
+     * @return      int
+     */
+    public function toIntJD($JD)
+    {
+        $res = $this->JD2DateArray($JD);
+        return gregoriantojd($res[1], $res[2], $res[0]);
+    }
+    /* ----------------------------------------- */
 
 }

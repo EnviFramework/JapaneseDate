@@ -12,6 +12,7 @@
 
 
 require dirname(__FILE__).DIRECTORY_SEPARATOR.'JapaneseDateCalendar.php';
+
 require dirname(__FILE__).DIRECTORY_SEPARATOR.'JapaneseDate'.DIRECTORY_SEPARATOR.'JapaneseDate.php';
 require dirname(__FILE__).DIRECTORY_SEPARATOR.'JapaneseDate'.DIRECTORY_SEPARATOR.'LunarCalendar.php';
 
@@ -123,16 +124,15 @@ class JapaneseDateTime extends DateTime
     }
     /* ----------------------------------------- */
 
-
     /**
-     * +-- 指定月のカレンダー配列を取得します
+     * +-- 指定月の日付配列を取得します
      *
      * @access      public
      * @param integer $year 年
      * @param integer $month 月
      * @return      array
      */
-    public function getCalendar()
+    public function getDatesOfMonth()
     {
         $JDT = clone $this;
         $JDT->setDate($this->getYear(), $this->getMonth(), 1);
@@ -156,22 +156,21 @@ class JapaneseDateTime extends DateTime
      */
     public function getEraName()
     {
-        $time_stamp = $this->getTimestamp();
+        $TaishoStart    = new DateTime('1912-07-30 00:00:00', $this->getTimezone());
+        $ShowaStart     = new DateTime('1926-12-25 00:00:00', $this->getTimezone());
+        $HeiseiStart    = new DateTime('1989-01-08 00:00:00', $this->getTimezone());
 
-        $TaishoDT = new DateTime('1989-12-24 00:00:00', $this->getTimezone());
-        $ShowaDT  = new DateTime('1989-01-07 00:00:00', $this->getTimezone());
-
-        if ($TaishoDT->getTimestamp() > $time_stamp) {
+        if ($TaishoStart > $this) {
             // 明治
             return self::ERA_MEIJI;
         }
 
-        if ($TaishoDT->getTimestamp() <= $time_stamp && $ShowaDT->getTimestamp() > $time_stamp) {
+        if ($TaishoStart <= $this && $ShowaStart > $this) {
             // 大正
             return self::ERA_TAISHO;
         }
 
-        if ($ShowaDT->getTimestamp() <= $time_stamp) {
+        if ($ShowaStart <= $this && $HeiseiStart > $this) {
             // 昭和
             return self::ERA_SHOWA;
         }
@@ -190,14 +189,13 @@ class JapaneseDateTime extends DateTime
      */
     public function getEraYear()
     {
-        $era_calc = [
-            self::ERA_MEIJI  => 1868,
+        $era_calc = array(self::ERA_MEIJI  => 1868,
             self::ERA_TAISHO => 1912,
             self::ERA_SHOWA  => 1926,
             self::ERA_HEISEI => 1989,
-        ];
+        );
         $key = $this->getEraName();
-        return $this->getYear()-$era_calc[$key];
+        return $this->getYear()-$era_calc[$key]+1;
     }
     /* ----------------------------------------- */
 
@@ -267,19 +265,6 @@ class JapaneseDateTime extends DateTime
     public function getDay()
     {
         return (int)$this->format('j');
-    }
-    /* ----------------------------------------- */
-
-    /**
-     * +-- 日を表示用フォーマットで返します
-     *
-     * @access      public
-     * @return      str
-     *
-     */
-    public function getStrDay()
-    {
-        return $this->format('d');
     }
     /* ----------------------------------------- */
 
@@ -411,18 +396,6 @@ class JapaneseDateTime extends DateTime
     }
     /* ----------------------------------------- */
 
-    /**
-     * +-- 旧暦に直したタイムスタンプ
-     *
-     * @access      public
-     * @return      int
-     */
-    public function getLunarTimeStamp()
-    {
-        $lunar_calendar = $this->getLunarCalendar();
-        return $lunar_calendar['time_stamp'];
-    }
-    /* ----------------------------------------- */
 
     /**
      * +-- 中気かどうか
@@ -450,18 +423,69 @@ class JapaneseDateTime extends DateTime
     }
     /* ----------------------------------------- */
 
+
     /**
      * +-- 中気の取得
      *
      * @access      public
-     * @return      flote
+     * @return      JapaneseDateTime
      */
     public function getChuki()
     {
         $lunar_calendar = $this->getLunarCalendar();
-        return $lunar_calendar['chuki'];
+        $time = $this->LC->JD2Timestamp($lunar_calendar['chuki']);
+        return self::factory($time);
     }
     /* ----------------------------------------- */
+
+
+
+    /**
+     * +-- 朔の取得
+     *
+     * @access      public
+     * @return      JapaneseDateTime
+     */
+    public function getTsuitachi()
+    {
+        $lunar_calendar = $this->getLunarCalendar();
+        $time = $this->LC->JD2Timestamp($lunar_calendar['tsuitachi_jd']);
+        return self::factory($time);
+    }
+    /* ----------------------------------------- */
+
+
+
+
+    /**
+     * +-- カレンダーの取得
+     *
+     * @access      public
+     * @return      array
+     */
+    public function getCalendar($calendar = CAL_GREGORIAN)
+    {
+        return cal_from_jd(unixtojd($this->getTimestamp()), $calendar);
+    }
+    /* ----------------------------------------- */
+
+
+
+
+    /**
+     * +-- 中気の取得
+     *
+     * @access      public
+     * @return      array
+     */
+    public function getChukiCalendar($calendar = CAL_GREGORIAN)
+    {
+        $lunar_calendar = $this->getLunarCalendar();
+        return cal_from_jd($this->LC->toIntJD($lunar_calendar['chuki']), $calendar);
+    }
+    /* ----------------------------------------- */
+
+
 
     /**
      * +-- 朔の取得
@@ -469,10 +493,10 @@ class JapaneseDateTime extends DateTime
      * @access      public
      * @return      string
      */
-    public function getTsuitachi()
+    public function getTsuitachiCalendar($calendar = CAL_GREGORIAN)
     {
         $lunar_calendar = $this->getLunarCalendar();
-        return $lunar_calendar['tsuitachi_jd'];
+        return cal_from_jd($this->LC->toIntJD($lunar_calendar['tsuitachi_jd']), $calendar);
     }
     /* ----------------------------------------- */
 
@@ -540,12 +564,9 @@ class JapaneseDateTime extends DateTime
      */
     public function time2JD()
     {
-        return $this->lc->time2JD($this->getTimestamp());
+        return $this->LC->time2JD($this->getTimestamp());
     }
     /* ----------------------------------------- */
-
-
-
 
 
     /**
@@ -554,7 +575,8 @@ class JapaneseDateTime extends DateTime
      * <pre>{@link http://php.five-foxes.com/module/php_man/index.php?web=public function.strftime strftimeの仕様}
      * に加え、
      * %J 1～31の日
-     * %g 1～9なら先頭にスペースを付ける、1～31の日
+     * %e 1～9なら先頭にスペースを付ける、1～31の日
+     * %g 1～9なら先頭にスペースを付ける、1～12の月
      * %K 和名曜日
      * %k 六曜番号
      * %6 六曜
@@ -608,8 +630,14 @@ class JapaneseDateTime extends DateTime
             case '6':
                 $re_format = $this->getSixWeekday();
                 break;
-            case 'g':
+            case 'e':
                 $re_format = $this->format('j');
+                if (strlen($re_format) === 1) {
+                    $re_format = ' '.$re_format;
+                }
+                break;
+            case 'g':
+                $re_format = $this->format('n');
                 if (strlen($re_format) === 1) {
                     $re_format = ' '.$re_format;
                 }
@@ -652,6 +680,18 @@ class JapaneseDateTime extends DateTime
     public function getCompareFormat()
     {
         return (int)$this->format('Ymd');
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +-- 比較用のYMD
+     *
+     * @access      public
+     * @return      int
+     */
+    public function toIntJD($JD)
+    {
+        return (int)$this->LC->toIntJD($JD);
     }
     /* ----------------------------------------- */
 

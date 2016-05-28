@@ -140,8 +140,259 @@ class JapaneseDateCalendarTest extends testCaseBase
 
         $this->assertArray($res);
         $this->assertCount(1, $res);
+
+        return $res;
     }
     /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       var_text $calendar
+     * @return      void
+     */
+    public function removeBypassWeekDayTest()
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+
+        $JapaneseDateCalendar->removeBypassWeekDay(JapaneseDateTime::SUNDAY);
+
+        $res = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+
+        $this->assertArray($res);
+        $this->assertCount(3, $res);
+
+        $JapaneseDateCalendar->removeBypassWeekDay(JapaneseDateTime::SUNDAY);
+
+        $res2 = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+        $this->assertArray($res2);
+        $this->assertCount(3, $res2);
+        $this->assertSame($res2[0]->getTimestamp(), $res[0]->getTimestamp());
+
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       var_text $calendar
+     * @return      void
+     */
+    public function resetBypassWeekDayTest()
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+
+        $JapaneseDateCalendar->resetBypassWeekDay();
+
+        $res = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+
+        $this->assertArray($res);
+        $this->assertCount(5, $res);
+
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       var_text $calendar
+     * @return      void
+     */
+    public function removeBypassDayTest()
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+
+        $JapaneseDateCalendar->removeBypassDay('2016-05-02');
+
+        $res = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+        $this->assertArray($res);
+        $this->assertCount(2, $res);
+
+
+
+        $JapaneseDateCalendar->removeBypassDay('2016-05-06');
+
+        $res = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+        $this->assertArray($res);
+        $this->assertCount(3, $res);
+
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @param       var_text $calendar
+     * @return      void
+     */
+    public function resetBypassDayTest()
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+
+        $JapaneseDateCalendar->resetBypassDay();
+
+        $res = $JapaneseDateCalendar->getWorkingDayBySpan(
+            strtotime('2016-05-09 00:00:00')
+        );
+
+
+        $this->assertArray($res);
+        $this->assertCount(3, $res);
+
+    }
+    /* ----------------------------------------- */
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @return      void
+     * @depends getWorkingDayByWithWeekAndDayUseStringDateTest
+     */
+    public function getWorkingDayByLimitTest($data)
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+        $res = $JapaneseDateCalendar->getWorkingDayByLimit(
+            1
+        );
+
+
+        $this->assertArray($res);
+        $this->assertCount(1, $res);
+        $this->assertSame($data[0]->getTimestamp(), $res[0]->getTimestamp());
+
+       $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+
+       $res2 = $JapaneseDateCalendar->getWorkingDayByLimit(
+            1
+        );
+
+
+        $this->assertArray($res2);
+        $this->assertCount(1, $res2);
+        $this->assertSame('2016-04-29', $res2[0]->format('Y-m-d'));
+
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-04-29'));
+
+        $res2 = $JapaneseDateCalendar->getWorkingDayByLimit(
+            1
+        );
+
+        $this->assertArray($res2);
+        $this->assertCount(1, $res2);
+        $this->assertSame($res2[0]->getTimestamp(), $res[0]->getTimestamp());
+
+
+
+
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::FRIDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-04-29'));
+
+        $res2 = $JapaneseDateCalendar->getWorkingDayByLimit(
+            1
+        );
+
+        $this->assertArray($res2);
+        $this->assertCount(1, $res2);
+        $this->assertSame($res2[0]->getTimestamp(), $res[0]->getTimestamp());
+
+        return $res;
+    }
+    /* ----------------------------------------- */
+
+
+    /**
+     * +--
+     *
+     * @access      public
+     * @return      void
+     * @depends getWorkingDayByLimitTest
+     * @covers JapaneseDateCalendar::getWorkingDay
+     */
+    public function getWorkingDayTest($data)
+    {
+        $JapaneseDateCalendar = new JapaneseDateCalendar('2016-04-29 00:00:00');
+        $JapaneseDateCalendar->setBypassHoliday(true);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SUNDAY);
+        $JapaneseDateCalendar->addBypassWeekDay(JapaneseDateTime::SATURDAY);
+        $JapaneseDateCalendar->addBypassDay('2016-05-02');
+        $JapaneseDateCalendar->addBypassDay(new JapaneseDateTime('2016-05-06'));
+
+        $res = $JapaneseDateCalendar->getWorkingDay(
+            1
+        );
+
+
+        $this->assertArray($res);
+        $this->assertCount(1, $res);
+        $this->assertSame($data[0]->getTimestamp(), $res[0]->getTimestamp());
+
+        return $res;
+    }
+    /* ----------------------------------------- */
+
+
 
     /**
      * +--

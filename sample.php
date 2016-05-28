@@ -140,7 +140,7 @@ foreach ($month_array as $month) {
 <?=$jd->format('m'); ?>月(<?php echo $jd->viewMonth();?>)
 <?php
 $noday = "-";
-$_from = $jd->getCalendar();
+$_from = $jd->getDatesOfMonth();
 
 $_foreach['calendar'] = array('total' => count($_from), 'iteration' => 0);
 
@@ -175,10 +175,10 @@ if ($_foreach['calendar']['total'] > 0):
 </th>
 </tr>
 <?php endif; ?>
-<?php if ($value->getWeekDay() == 0): ?>
+<?php if ($value->format('w') == 0): ?>
 <tr class="calendarday">
 <td class="<?php if ($value->getHoliday() == 0): ?>sunday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value->getDay(); ?><br />
+<?php echo $value->format('n'); ?><br />
 <?php echo $value->viewSixWeekday();?><br />
 <small><?php echo $value->getLunarYear(); ?>/
 <?php if ($value->isUruu()) : ?>
@@ -189,22 +189,22 @@ if ($_foreach['calendar']['total'] > 0):
 <?php echo $value->viewHoliday(); ?>
 <?php endif; ?>
 </td>
-<?php elseif ($value->getWeekDay() > 0 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php elseif ($value->format('w') > 0 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <tr class="calendarday">
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() > 1 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->format('w') > 1 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() > 2 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->format('w') > 2 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() > 3 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->format('w') > 3 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() > 4 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->format('w') > 4 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() > 5 && ($_foreach['calendar']['iteration'] <= 1)): ?>
+<?php endif;  if ($value->format('w') > 5 && ($_foreach['calendar']['iteration'] <= 1)): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() == 6): ?>
+<?php endif;  if ($value->format('w') == 6): ?>
 <td class="<?php if ($value->getHoliday() == 0): ?>saturday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value->getDay(); ?><br />
+<?php echo $value->format('n'); ?><br />
 <?php echo $value->viewSixWeekday();?><br />
 <small><?php echo $value->getLunarYear(); ?>/
 <?php if ($value->isUruu()) : ?>
@@ -218,9 +218,9 @@ if ($_foreach['calendar']['total'] > 0):
 </td>
 </tr>
 
-<?php elseif ($value->getWeekDay() > 0): ?>
+<?php elseif ($value->format('w') > 0): ?>
 <td class="<?php if ($value->getHoliday() == 0): ?>weekday<?php else: ?>holiday<?php endif; ?>">
-<?php echo $value->getDay(); ?><br />
+<?php echo $value->format('n'); ?><br />
 <?php echo $value->viewSixWeekday();?><br />
 <small><?php echo $value->getLunarYear(); ?>/
 <?php if ($value->isUruu()) : ?>
@@ -231,17 +231,17 @@ if ($_foreach['calendar']['total'] > 0):
 <?php echo $value->viewHoliday(); ?>
 <?php endif; ?>
 </td>
-<?php endif;  if (($_foreach['calendar']['iteration'] == $_foreach['calendar']['total'])):  if ($value->getWeekDay() < 1): ?>
+<?php endif;  if (($_foreach['calendar']['iteration'] == $_foreach['calendar']['total'])):  if ($value->format('w') < 1): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() < 2): ?>
+<?php endif;  if ($value->format('w') < 2): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() < 3): ?>
+<?php endif;  if ($value->format('w') < 3): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() < 4): ?>
+<?php endif;  if ($value->format('w') < 4): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() < 5): ?>
+<?php endif;  if ($value->format('w') < 5): ?>
 <td class="weekday"><?php echo $noday;?></td>
-<?php endif;  if ($value->getWeekDay() < 6): ?>
+<?php endif;  if ($value->format('w') < 6): ?>
 <td class="weekday"><?php echo $noday;?></td>
 <?php endif; ?>
 </table>

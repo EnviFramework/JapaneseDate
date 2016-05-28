@@ -177,36 +177,6 @@ class JapaneseDateCalendar
     }
     /* ----------------------------------------- */
 
-    /**
-     * +-- 当月のカレンダー配列を取得します
-     *
-     * @access      public
-     * @return      array
-     */
-    public static function getCalendar()
-    {
-        $JDT = clone $this->start_time_stamp;
-
-        $year  = $JDT->getYear();
-        $month = $JDT->getMonth();
-
-        $JDT->setDate($year, $month, 1);
-        $compare_month = $JD->format('m');
-        $res = array();
-        while ($JDT->format('m') === $compare_month) {
-            if ((array_key_exists($JDT->getWeekday(), $this->bypass_week_day_arr) === false) &&
-                (array_key_exists($JDT->getCompareFormat(), $this->bypass_day_arr) === false) &&
-                ($this->is_bypass_holiday ? $JDT->getHoliday() === JapaneseDateTime::NO_HOLIDAY : true)) {
-                $res[] = clone $JDT;
-            }
-            $JDT->add(new DateInterval('P1D'));
-        }
-        return $res;
-    }
-    /* ----------------------------------------- */
-
-
-
 
     /**
      * +-- 営業日を取得します
@@ -233,10 +203,9 @@ class JapaneseDateCalendar
     public function getWorkingDayByLimit($lim_day)
     {
         $JDT = clone $this->start_time_stamp;
-        $end_compare = $JDT_end->getCompareFormat();
 
         $res = array();
-        while (count($res) !== $lim_day) {
+        while (count($res) < $lim_day) {
             if ((array_key_exists($JDT->getWeekday(), $this->bypass_week_day_arr) === false) &&
                 (array_key_exists($JDT->getCompareFormat(), $this->bypass_day_arr) === false) &&
                 ($this->is_bypass_holiday ? $JDT->getHoliday() === JapaneseDateTime::NO_HOLIDAY : true)) {
